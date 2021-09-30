@@ -1,4 +1,0 @@
-//Singleton
-public class GameSpawner {
-
-}
