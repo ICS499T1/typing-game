@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Entity
@@ -13,10 +14,11 @@ public class User {
     private String username;
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
+    @Column(name="userID")
     private Long userID;
-    @OneToOne(mappedBy = "stats", cascade = CascadeType.ALL)
+    @OneToOne
     @PrimaryKeyJoinColumn
     private Stats userStats;
-    @OneToMany(mappedBy = "users")
-    private ArrayList<KeyStats> allKeys = new ArrayList<>(120);
+    @OneToMany(mappedBy = "user")
+    private List<KeyStats> allKeys = new ArrayList<>(120);
 }

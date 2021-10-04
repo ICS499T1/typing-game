@@ -8,9 +8,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "stats")
 public class Stats {
-    @OneToOne(mappedBy = "users", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private User user;
+    @Id
+    @Column(name="statsID")
+    private Long statsID;
+
+//    @OneToOne (mappedBy = "userID", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//    @PrimaryKeyJoinColumn(name="userID", referencedColumnName="userID")
+//    private User user;
     private double averageSpeed;
     private int numRacesCompleted;
     private int racesWon;

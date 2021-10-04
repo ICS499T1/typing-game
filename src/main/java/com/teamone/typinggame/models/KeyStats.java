@@ -9,9 +9,13 @@ import java.util.Map;
 @Entity
 @Table(name = "key_stats")
 public class KeyStats {
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    private Long keyID;
     private char character;
     private long numFails;
     private long numSuccesses;
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name="userID", nullable = false)
     private User user;
 }
