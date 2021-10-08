@@ -16,9 +16,27 @@ public class User {
     @Id
     @Column(name="userID")
     private Long userID;
-    @OneToOne
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private Stats userStats;
     @OneToMany(mappedBy = "user")
     private List<KeyStats> allKeys = new ArrayList<>(120);
+
+    public User() {
+    }
+
+    public User(String username, Stats userStats, List<KeyStats> allKeys) {
+        this.username = username;
+        this.userStats = userStats;
+        this.allKeys = allKeys;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", userStats=" + userStats +
+                ", allKeys=" + allKeys +
+                '}';
+    }
 }

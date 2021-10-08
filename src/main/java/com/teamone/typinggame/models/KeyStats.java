@@ -18,4 +18,14 @@ public class KeyStats {
     @ManyToOne
     @JoinColumn(name="userID", nullable = false)
     private User user;
+
+    public KeyStats() {
+    }
+
+    public KeyStats(char character, long numFails, long numSuccesses, User user) {
+        this.character = character;
+        this.numFails = numFails;
+        this.numSuccesses = numSuccesses;
+        this.user = user;
+    }
 }

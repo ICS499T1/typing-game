@@ -9,15 +9,28 @@ import javax.persistence.*;
 @Table(name = "stats")
 public class Stats {
     @Id
-    @Column(name="statsID")
-    private Long statsID;
+    @Column(name="userID")
+    private Long userID;
 
-//    @OneToOne (mappedBy = "userID", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    @PrimaryKeyJoinColumn(name="userID", referencedColumnName="userID")
-//    private User user;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "userID")
+    private User user;
     private double averageSpeed;
     private int numRacesCompleted;
     private int racesWon;
     private int lastRaceSpeed;
     private int bestRaceSpeed;
+
+    public Stats() {
+    }
+
+    public Stats(User user, double averageSpeed, int numRacesCompleted, int racesWon, int lastRaceSpeed, int bestRaceSpeed) {
+        this.user = user;
+        this.averageSpeed = averageSpeed;
+        this.numRacesCompleted = numRacesCompleted;
+        this.racesWon = racesWon;
+        this.lastRaceSpeed = lastRaceSpeed;
+        this.bestRaceSpeed = bestRaceSpeed;
+    }
 }
