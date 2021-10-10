@@ -9,7 +9,8 @@ import java.util.Map;
 @Entity
 @Table(name = "key_stats")
 public class KeyStats {
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long keyID;
     private char character;
@@ -18,6 +19,10 @@ public class KeyStats {
     @ManyToOne
     @JoinColumn(name="userID", nullable = false)
     private User user;
+
+    public Long getKeyID() {
+        return keyID;
+    }
 
     public KeyStats() {
     }
