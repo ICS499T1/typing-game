@@ -26,32 +26,34 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<KeyStats> allKeys;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setUserStats(Stats userStats) {
-        this.userStats = userStats;
-    }
-
     public Long getUserID() {
         return userID;
     }
 
-    public Stats getUserStats() {
-        return userStats;
+    public User() {
+    }
+
+    public User(String username) {
+        this.username = username;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public User() {
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public User(String username, Stats userStats, List<KeyStats> allKeys) {
-        this.username = username;
-        this.userStats = userStats;
+    public Stats getUserStats() {
+        return userStats;
+    }
+
+    public List<KeyStats> getAllKeys() {
+        return allKeys;
+    }
+
+    public void setAllKeys(List<KeyStats> allKeys) {
         this.allKeys = allKeys;
     }
 
