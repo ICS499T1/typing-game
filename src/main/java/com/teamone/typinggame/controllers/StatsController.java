@@ -15,13 +15,13 @@ public class StatsController {
     }
 
     @PutMapping("/multi")
-    public void updateStatsMultiplayer(@RequestParam(name="id") Integer statsId, @RequestParam(name="speed") Double speed, @RequestParam(name="victory") Boolean victory) {
-        System.out.println(statsId + " " + speed + " " + victory);
+    public void updateStatsMultiplayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed, @RequestParam(name="victory") Boolean victory) {
+        statsService.updateStatsMultiplayer(statsId, speed, victory);
     }
 
     @PutMapping("/single")
-    public void updateStatsSinglePlayer(@RequestParam(name="id") Integer statsId, @RequestParam(name="speed") Double speed) {
-        
+    public void updateStatsSinglePlayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed) {
+        statsService.updateStatsSinglePlayer(statsId, speed);
     }
 
 

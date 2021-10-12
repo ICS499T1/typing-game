@@ -18,9 +18,10 @@ public class UserService {
     }
 
     public User newUser(User user) {
-        Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0);
+        Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
         user.setUserStats(userStats);
         userStats.setUser(user);
+        System.out.println(user.toString());
         return userRepository.saveAndFlush(user);
     }
 }

@@ -45,6 +45,10 @@ public class User {
         this.username = username;
     }
 
+    public void setUserStats(Stats userStats) {
+        this.userStats = userStats;
+    }
+
     public Stats getUserStats() {
         return userStats;
     }

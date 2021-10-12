@@ -19,10 +19,11 @@ public class Stats {
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
     private double averageSpeed;
-    private int numRacesCompleted;
+    private int numSingleGamesCompleted;
+    private int numMultiGamesCompleted;
     private int racesWon;
-    private int lastRaceSpeed;
-    private int bestRaceSpeed;
+    private double lastRaceSpeed;
+    private double bestRaceSpeed;
 
     public User getUser() {
         return user;
@@ -40,16 +41,32 @@ public class Stats {
         this.averageSpeed = averageSpeed;
     }
 
-    public int getNumRacesCompleted() {
-        return numRacesCompleted;
+    public int getNumSingleGamesCompleted() {
+        return numSingleGamesCompleted;
     }
 
-    public void setNumRacesCompleted(int numRacesCompleted) {
-        this.numRacesCompleted = numRacesCompleted;
+    public void setNumSingleGamesCompleted(int numSingleGamesCompleted) {
+        this.numSingleGamesCompleted = numSingleGamesCompleted;
     }
 
-    public void updateNumRacesCompleted() {
-        this.numRacesCompleted++;
+    public int getNumMultiGamesCompleted() {
+        return numMultiGamesCompleted;
+    }
+
+    public void setNumMultiGamesCompleted(int numMultiGamesCompleted) {
+        this.numMultiGamesCompleted = numMultiGamesCompleted;
+    }
+
+    public void updateNumSingleGamesCompleted() {
+        this.numSingleGamesCompleted++;
+    }
+
+    public void updateNumMultiGamesCompleted() {
+        this.numMultiGamesCompleted++;
+    }
+
+    public void updateRacesWon() {
+        this.racesWon++;
     }
 
     public int getRacesWon() {
@@ -60,29 +77,30 @@ public class Stats {
         this.racesWon = racesWon;
     }
 
-    public int getLastRaceSpeed() {
+    public double getLastRaceSpeed() {
         return lastRaceSpeed;
     }
 
-    public void setLastRaceSpeed(int lastRaceSpeed) {
+    public void setLastRaceSpeed(double lastRaceSpeed) {
         this.lastRaceSpeed = lastRaceSpeed;
     }
 
-    public int getBestRaceSpeed() {
+    public double getBestRaceSpeed() {
         return bestRaceSpeed;
     }
 
-    public void setBestRaceSpeed(int bestRaceSpeed) {
+    public void setBestRaceSpeed(double bestRaceSpeed) {
         this.bestRaceSpeed = bestRaceSpeed;
     }
 
     public Stats() {
     }
 
-    public Stats(User user, double averageSpeed, int numRacesCompleted, int racesWon, int lastRaceSpeed, int bestRaceSpeed) {
+    public Stats(User user, double averageSpeed, int numSingleGamesCompleted, int numMultiGamesCompleted, int racesWon, int lastRaceSpeed, int bestRaceSpeed) {
         this.user = user;
         this.averageSpeed = averageSpeed;
-        this.numRacesCompleted = numRacesCompleted;
+        this.numSingleGamesCompleted = numSingleGamesCompleted;
+        this.numMultiGamesCompleted = numMultiGamesCompleted;
         this.racesWon = racesWon;
         this.lastRaceSpeed = lastRaceSpeed;
         this.bestRaceSpeed = bestRaceSpeed;

@@ -14,11 +14,61 @@ public class StatsService {
         this.statsRepository = statsRepository;
     }
 
-    public void updateNumOfRaces(Stats stats) {
-        stats.updateNumRacesCompleted();
+    public void updateStatsMultiplayer(Long statsId, Double speed, Boolean victory) {
+        Stats stats = statsRepository.getById(statsId);
+        updateMultiplayerAvgSpeed(stats, speed, victory);
+        updateBestRace(stats, speed);
+        updateLastRace(stats, speed);
+        updateRacesWon(stats, victory);
+        statsRepository.saveAndFlush(stats);
     }
 
-    public void updateAvgSpeed(Stats stats) {
+    public void updateStatsSinglePlayer(Long statsId, Double speed) {
+        Stats stats = statsRepository.getById(statsId);
+        updateSingleAvgSpeed(stats, speed);
+        updateBestRace(stats, speed);
+        updateLastRace(stats, speed);
+        statsRepository.saveAndFlush(stats);
+    }
 
+    public void updateSingleAvgSpeed(Stats stats, Double speed) {
+        double currentAverage = stats.getAverageSpeed();
+        int currentRaces = stats.getNumSingleGamesCompleted() + stats.getNumMultiGamesCompleted();
+        double numerator = currentAverage * currentRaces + speed;
+        int denominator = updateSingleNumOfRaces(stats) + stats.getNumMultiGamesCompleted();
+        stats.setAverageSpeed(numerator/denominator);
+    }
+
+    public void updateMultiplayerAvgSpeed(Stats stats, Double speed, Boolean victory) {
+        double currentAverage = stats.getAverageSpeed();
+        int currentRaces = stats.getNumMultiGamesCompleted();
+        double numerator = currentAverage * currentRaces + speed;
+        double denominator = updateMultiNumOfRaces(stats) + stats.getNumSingleGamesCompleted();
+        stats.setAverageSpeed(numerator/denominator);
+    }
+
+    private void updateBestRace(Stats stats, Double speed) {
+        double currentBestSpeed = stats.getBestRaceSpeed();
+        if (currentBestSpeed < speed) {
+            stats.setBestRaceSpeed(speed);
+        }
+    }
+
+    private void updateRacesWon(Stats stats, Boolean victory) {
+        if (victory) stats.updateRacesWon();
+    }
+
+    private void updateLastRace(Stats stats, Double speed) {
+        stats.setLastRaceSpeed(speed);
+    }
+
+    private int updateSingleNumOfRaces(Stats stats) {
+        stats.updateNumSingleGamesCompleted();
+        return stats.getNumSingleGamesCompleted();
+    }
+
+    private int updateMultiNumOfRaces(Stats stats) {
+        stats.updateNumMultiGamesCompleted();
+        return stats.getNumMultiGamesCompleted();
     }
 }
