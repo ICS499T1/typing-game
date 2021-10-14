@@ -33,4 +33,36 @@ public class KeyStats {
         this.numSuccesses = numSuccesses;
         this.user = user;
     }
+
+    public char getCharacter() {
+        return character;
+    }
+
+    public void setCharacter(char character) {
+        this.character = character;
+    }
+
+    public long getNumFails() {
+        return numFails;
+    }
+
+    public void setNumFails(long numFails) {
+        this.numFails = numFails;
+    }
+
+    public long getNumSuccesses() {
+        return numSuccesses;
+    }
+
+    public void setNumSuccesses(long numSuccesses) {
+        this.numSuccesses = numSuccesses;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

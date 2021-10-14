@@ -14,24 +14,24 @@ public class StatsService {
         this.statsRepository = statsRepository;
     }
 
-    public void updateStatsMultiplayer(Long statsId, Double speed, Boolean victory) {
+    public Stats updateStatsMultiplayer(Long statsId, Double speed, Boolean victory) {
         Stats stats = statsRepository.getById(statsId);
         updateMultiplayerAvgSpeed(stats, speed, victory);
         updateBestRace(stats, speed);
         updateLastRace(stats, speed);
         updateRacesWon(stats, victory);
-        statsRepository.saveAndFlush(stats);
+        return statsRepository.saveAndFlush(stats);
     }
 
-    public void updateStatsSinglePlayer(Long statsId, Double speed) {
+    public Stats updateStatsSinglePlayer(Long statsId, Double speed) {
         Stats stats = statsRepository.getById(statsId);
         updateSingleAvgSpeed(stats, speed);
         updateBestRace(stats, speed);
         updateLastRace(stats, speed);
-        statsRepository.saveAndFlush(stats);
+        return statsRepository.saveAndFlush(stats);
     }
 
-    public void updateSingleAvgSpeed(Stats stats, Double speed) {
+    private void updateSingleAvgSpeed(Stats stats, Double speed) {
         double currentAverage = stats.getAverageSpeed();
         int currentRaces = stats.getNumSingleGamesCompleted() + stats.getNumMultiGamesCompleted();
         double numerator = currentAverage * currentRaces + speed;
@@ -39,7 +39,7 @@ public class StatsService {
         stats.setAverageSpeed(numerator/denominator);
     }
 
-    public void updateMultiplayerAvgSpeed(Stats stats, Double speed, Boolean victory) {
+    private void updateMultiplayerAvgSpeed(Stats stats, Double speed, Boolean victory) {
         double currentAverage = stats.getAverageSpeed();
         int currentRaces = stats.getNumMultiGamesCompleted();
         double numerator = currentAverage * currentRaces + speed;

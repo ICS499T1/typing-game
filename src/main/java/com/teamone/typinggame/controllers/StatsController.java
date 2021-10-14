@@ -1,5 +1,6 @@
 package com.teamone.typinggame.controllers;
 
+import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.services.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +16,13 @@ public class StatsController {
     }
 
     @PutMapping("/multi")
-    public void updateStatsMultiplayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed, @RequestParam(name="victory") Boolean victory) {
-        statsService.updateStatsMultiplayer(statsId, speed, victory);
+    public Stats updateStatsMultiplayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed, @RequestParam(name="victory") Boolean victory) {
+        return statsService.updateStatsMultiplayer(statsId, speed, victory);
     }
 
     @PutMapping("/single")
-    public void updateStatsSinglePlayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed) {
-        statsService.updateStatsSinglePlayer(statsId, speed);
+    public Stats updateStatsSinglePlayer(@RequestParam(name="id") Long statsId, @RequestParam(name="speed") Double speed) {
+        return statsService.updateStatsSinglePlayer(statsId, speed);
     }
 
 
