@@ -1,5 +1,6 @@
 package com.teamone.typinggame.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import java.util.Map;
 @Component
 @Entity
 @Table(name = "key_stats")
+@JsonIgnoreProperties(value={"user"})
 public class KeyStats {
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +19,7 @@ public class KeyStats {
     private long numFails;
     private long numSuccesses;
     @ManyToOne
-    @JoinColumn(name="userID", nullable = false)
+    @JoinColumn(name="userID", nullable = false, insertable= false, updatable= false)
     private User user;
 
     public Long getKeyID() {
