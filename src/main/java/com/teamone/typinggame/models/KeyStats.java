@@ -18,8 +18,9 @@ public class KeyStats {
     private char character;
     private long numFails;
     private long numSuccesses;
+
     @ManyToOne
-    @JoinColumn(name="userID", nullable = false, insertable= false, updatable= false)
+    @JoinColumn(name="userID", nullable = false)
     private User user;
 
     public Long getKeyID() {

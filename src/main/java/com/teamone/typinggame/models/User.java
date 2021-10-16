@@ -23,8 +23,8 @@ public class User {
     @PrimaryKeyJoinColumn
     private Stats userStats;
 
-    @OneToMany
-    @JoinColumn(name="userID", nullable = false)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    @JoinColumn(name="userID", nullable = false)
     private List<KeyStats> allKeys;
 
     public Long getUserID() {
