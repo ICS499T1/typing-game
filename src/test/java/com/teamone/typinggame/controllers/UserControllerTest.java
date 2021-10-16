@@ -24,6 +24,9 @@ import org.springframework.http.MediaType;
 @AutoConfigureMockMvc
 class UserControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
     @MockBean
     private UserService userService;
 
@@ -36,6 +39,13 @@ class UserControllerTest {
     }
 
     @Test
-    void newUser() {
+    void newUser() throws Exception {
+        User mockUser = new User("testuser");
+        when(userService.newUser(mockUser)).thenReturn(mockUser);
+        mockMvc.perform(post("/user/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"username1\"}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
     }
 }
