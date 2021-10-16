@@ -8,7 +8,10 @@ import java.util.Map;
 
 @Component
 @Entity
-@Table(name = "key_stats")
+@Table(
+        name = "key_stats",
+        uniqueConstraints =
+            @UniqueConstraint(columnNames = {"userID", "character"}))
 @JsonIgnoreProperties(value={"user"})
 public class KeyStats {
     @Column(nullable = false)
