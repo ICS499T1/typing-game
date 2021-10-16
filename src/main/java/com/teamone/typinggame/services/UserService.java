@@ -21,15 +21,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUserById(Long userId) {
-        List<User> list = userRepository.findAll();
-        User result = null;
-        for (User user : list) {
-            if(user.getUserID() == userId) result = user;
-        }
-        return result;
-    }
-
     public User newUser(User user) {
         Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
         user.setUserStats(userStats);
