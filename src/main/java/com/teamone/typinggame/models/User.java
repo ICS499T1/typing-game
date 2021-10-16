@@ -24,7 +24,7 @@ public class User {
     @PrimaryKeyJoinColumn
     private Stats userStats;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 //    @JoinColumn(name="userID", nullable = false)
     private List<KeyStats> allKeys;
 
@@ -61,19 +61,6 @@ public class User {
 
     public void setAllKeys(List<KeyStats> allKeys) {
         this.allKeys = allKeys;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return username.equals(user.username);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(username);
     }
 
     @Override

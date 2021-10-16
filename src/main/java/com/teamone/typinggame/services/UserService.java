@@ -22,7 +22,12 @@ public class UserService {
     }
 
     public User getUserById(Long userId) {
-        return userRepository.getById(userId);
+        List<User> list = userRepository.findAll();
+        User result = null;
+        for (User user : list) {
+            if(user.getUserID() == userId) result = user;
+        }
+        return result;
     }
 
     public User newUser(User user) {

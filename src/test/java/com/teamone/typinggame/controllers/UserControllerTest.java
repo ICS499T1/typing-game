@@ -4,6 +4,7 @@ import com.teamone.typinggame.models.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import com.teamone.typinggame.services.UserService;
 import org.json.JSONObject;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.springframework.test.web.servlet.MvcResult;
@@ -38,21 +38,14 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        System.out.println("Setting the user test");
+        System.out.println("-----Setting up user controller test-----");
         mockUser = new User("testuser");
     }
 
-    @AfterEach
-    void tearDown() {
-        System.out.println("Stopping the user test");
-    }
-
     @Test
-    void newUser() throws Exception {
-        // testing the newUser method
+    void postRequestSuccessfulTest() throws Exception {
         when(userService.newUser(any(User.class))).thenReturn(mockUser);
-        assertEquals(userService.newUser(new User("anyusername")), mockUser);
-        // testing posting the user
+
         MvcResult mvcResult = mockMvc.perform(post("/user/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"testuser\"}")
@@ -60,8 +53,21 @@ class UserControllerTest {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
-
         JSONObject jsonObject = new JSONObject(mvcResult.getResponse().getContentAsString());
         assertEquals(mockUser.getUsername(), jsonObject.get("username"));
+    }
+
+    @Test
+    void postRequestNotFoundTest() throws Exception {
+        mockMvc.perform(post("/users/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"username\": \"testuser\"}")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.out.println("-----Terminating user controller test-----");
     }
 }
