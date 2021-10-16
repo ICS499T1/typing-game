@@ -18,7 +18,7 @@ class UserTest {
     @BeforeEach
     void setUp() {
         System.out.println("-----Setting up user tests-----");
-        mockUser = new User("testuser");
+        mockUser = new User("test");
     }
 
     @AfterEach
