@@ -26,8 +26,10 @@ public class UserService {
         user.setUserStats(userStats);
         userStats.setUser(user);
         KeyStats keyStats = new KeyStats('a', 5, 10, user);
+        KeyStats keyStats2 = new KeyStats('b', 10, 10, user);
         List<KeyStats> keyStatsList= new ArrayList<>();
         keyStatsList.add(keyStats);
+        keyStatsList.add(keyStats2);
         user.setAllKeys(keyStatsList);
         return userRepository.saveAndFlush(user);
     }

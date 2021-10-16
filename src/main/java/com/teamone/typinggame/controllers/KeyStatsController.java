@@ -1,12 +1,10 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.KeyStats;
+import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.KeyStatsService;
-import com.teamone.typinggame.services.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,6 +21,11 @@ public class KeyStatsController {
     @GetMapping("/test")
     public List<KeyStats> test(){
         return keyStatsService.test();
+    }
+
+    @PostMapping("/getuserkeys")
+    public List<KeyStats> getUserKeys(@RequestBody User user) {
+        return keyStatsService.getUserKeys(user);
     }
 
 
