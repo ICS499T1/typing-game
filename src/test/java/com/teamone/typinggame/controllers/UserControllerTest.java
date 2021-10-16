@@ -1,13 +1,16 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.User;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import com.teamone.typinggame.services.UserService;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +19,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.http.MediaType;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.test.web.servlet.MvcResult;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
+
+    private User mockUser;
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,20 +38,30 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
+        System.out.println("Setting the user test");
+        mockUser = new User("testuser");
     }
 
     @AfterEach
     void tearDown() {
+        System.out.println("Stopping the user test");
     }
 
     @Test
     void newUser() throws Exception {
-        User mockUser = new User("testuser");
-        when(userService.newUser(mockUser)).thenReturn(mockUser);
-        mockMvc.perform(post("/user/add")
+        // testing the newUser method
+        when(userService.newUser(any(User.class))).thenReturn(mockUser);
+        assertEquals(userService.newUser(new User("anyusername")), mockUser);
+        // testing posting the user
+        MvcResult mvcResult = mockMvc.perform(post("/user/add")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"username\": \"username1\"}")
+                        .content("{ \"username\": \"testuser\"}")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        JSONObject jsonObject = new JSONObject(mvcResult.getResponse().getContentAsString());
+        assertEquals(mockUser.getUsername(), jsonObject.get("username"));
     }
 }

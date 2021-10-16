@@ -21,7 +21,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUser(Long userId) {
+    public User getUserById(Long userId) {
         return userRepository.getById(userId);
     }
 
