@@ -21,6 +21,10 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public User getUser(Long userId) {
+        return userRepository.getById(userId);
+    }
+
     public User newUser(User user) {
         Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
         user.setUserStats(userStats);

@@ -30,6 +30,7 @@ class StatsControllerTest {
 
     @BeforeEach
     void setUp() {
+
     }
 
     @AfterEach
