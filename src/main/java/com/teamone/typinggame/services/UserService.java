@@ -33,4 +33,8 @@ public class UserService {
         user.setAllKeys(keyStatsList);
         return userRepository.saveAndFlush(user);
     }
+
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
 }
