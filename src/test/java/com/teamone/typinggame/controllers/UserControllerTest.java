@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import com.teamone.typinggame.services.UserService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -64,6 +66,24 @@ class UserControllerTest {
                 .content("{ \"username\": \"testuser\"}")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getRequestSuccessfulTest() throws Exception{
+        mockMvc.perform(get("/user/getusers")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+//        JSONArray jsonArray = new JSONArray(mvcResult.getResponse().getContentAsString());
+//        assertEquals(mockUser.getUsername(), jsonObject.get("username"));
+    }
+
+    @Test
+    void getRequestUnSuccessfulTest() throws Exception{
+        mockMvc.perform(get("/user/getusers1212")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andReturn();
     }
 
     @AfterEach
