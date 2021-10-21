@@ -1,7 +1,6 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.Stats;
-import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.StatsService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,22 +13,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import static org.mockito.Mockito.when;
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class StatsControllerTest {
-
-    private Stats mockStats;
 
     @MockBean
     private StatsService statsService;
@@ -37,40 +32,79 @@ class StatsControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private Stats mockStats;
+
     @BeforeEach
     void setUp() {
-        System.out.println("-----Setting up stats controller test-----");
-        User mockUser = new User("test");
-        mockStats = new Stats(mockUser,2, 3, 4, 5, 6, 7);
+        System.out.println("-----Setting up stats controller tests-----");
+        mockStats = new Stats();
+        mockStats.setLastRaceSpeed(61);
+        mockStats.updateRacesWon();
+        mockStats.setAverageSpeed(57.5);
+        mockStats.setBestRaceSpeed(70);
+        mockStats.setRacesWon(3);
+        mockStats.setNumMultiGamesCompleted(3);
+        mockStats.setNumSingleGamesCompleted(2);
     }
 
     @AfterEach
     void tearDown() {
+        System.out.println("-----Terminating stats controller tests-----");
     }
 
     @Test
-    void putRequestSuccessfulTest() throws Exception{
-        Stats mockStats = new Stats();
+    void updateStatsMultiplayerSuccessful() throws Exception {
         when(statsService.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
 
-        MvcResult mvcResult = mockMvc.perform(get("/stats/multi")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"statsId\" : \"1L\"}, {\"speed\" : \"2.0\"}, { \"victory\" : \"true\"} ")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put("/stats/multi?id="+1L+"&speed="+25.0+"&victory="+true)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(builder)
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
-    void updateStatsMultiplayer() throws Exception {
-        Stats mockStats = new Stats();
+    void updateStatsMultiplayerUnsuccessful() throws Exception {
         when(statsService.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
 
-        //mockMvc.perform(put("/")).andExpect();
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put("/stats/multiplayer?id="+1L+"&speed="+25.0+"&victory="+true)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(builder)
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+                .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
-    void updateStatsSinglePlayer() {
+    void updateStatsSinglePlayerSuccessful() throws Exception {
+        when(statsService.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
+
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put("/stats/single?id="+2L+"&speed="+30.0)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(builder)
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void updateStatsSinglePlayerUnsuccessful() throws Exception {
+        when(statsService.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
+
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put("/stats/sin?id="+2L+"&speed="+30.0)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(builder)
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+                .andDo(MockMvcResultHandlers.print());
     }
 }
