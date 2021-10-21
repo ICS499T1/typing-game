@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserServiceTest {
+class UserServiceImplTest {
 
     private User mockUser;
     private User result;
@@ -27,7 +27,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,12 +46,12 @@ class UserServiceTest {
 
     @Test
     void newUserAdded() {
-        result = userService.newUser(mockUser);
+        result = userServiceImpl.newUser(mockUser);
         assertEquals(result.getUsername(), mockUser.getUsername());
     }
 
     @Test
     void existingUserAdded() {
-        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> userService.newUser(new User("vtornik")));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> userServiceImpl.newUser(new User("vtornik")));
     }
 }

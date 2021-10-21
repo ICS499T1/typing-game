@@ -6,8 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import com.teamone.typinggame.services.UserService;
-import org.json.JSONArray;
+import com.teamone.typinggame.services.UserServiceImpl;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +35,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +45,7 @@ class UserControllerTest {
 
     @Test
     void postRequestSuccessfulTest() throws Exception {
-        when(userService.newUser(any(User.class))).thenReturn(mockUser);
+        when(userServiceImpl.newUser(any(User.class))).thenReturn(mockUser);
 
         MvcResult mvcResult = mockMvc.perform(post("/user/add")
                         .contentType(MediaType.APPLICATION_JSON)

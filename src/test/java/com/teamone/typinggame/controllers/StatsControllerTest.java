@@ -1,7 +1,7 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.Stats;
-import com.teamone.typinggame.services.StatsService;
+import com.teamone.typinggame.services.StatsServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class StatsControllerTest {
 
     @MockBean
-    private StatsService statsService;
+    private StatsServiceImpl statsServiceImpl;
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,7 +54,7 @@ class StatsControllerTest {
 
     @Test
     void updateStatsMultiplayerSuccessful() throws Exception {
-        when(statsService.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
+        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
 
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.put("/stats/multi?id="+1L+"&speed="+25.0+"&victory="+true)
@@ -68,7 +68,7 @@ class StatsControllerTest {
 
     @Test
     void updateStatsMultiplayerUnsuccessful() throws Exception {
-        when(statsService.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
+        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
 
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.put("/stats/multiplayer?id="+1L+"&speed="+25.0+"&victory="+true)
@@ -82,7 +82,7 @@ class StatsControllerTest {
 
     @Test
     void updateStatsSinglePlayerSuccessful() throws Exception {
-        when(statsService.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
+        when(statsServiceImpl.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
 
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.put("/stats/single?id="+2L+"&speed="+30.0)
@@ -96,7 +96,7 @@ class StatsControllerTest {
 
     @Test
     void updateStatsSinglePlayerUnsuccessful() throws Exception {
-        when(statsService.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
+        when(statsServiceImpl.updateStatsSinglePlayer(2L, 30.0)).thenReturn(mockStats);
 
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.put("/stats/sin?id="+2L+"&speed="+30.0)
