@@ -4,6 +4,7 @@ import com.teamone.typinggame.models.KeyStats;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
+import com.teamone.typinggame.storage.ActiveUserStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
@@ -34,5 +36,9 @@ public class UserServiceImpl implements UserService {
 
     public List<User> getUsers() {
         return userRepository.findAll();
+    }
+
+    public void removeActiveUser(Long userID) {
+        activeUserStorage.removeUser(userID);
     }
 }
