@@ -1,6 +1,8 @@
 package com.teamone.typinggame.models;
 
+import com.teamone.typinggame.configuration.GameConfig;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -11,6 +13,10 @@ import static com.teamone.typinggame.models.GameStatus.*;
 @NoArgsConstructor
 @Component
 public class Game {
+
+    @Autowired
+    private GameConfig gameConfig;
+
     @Getter
     private String gameId;
 
