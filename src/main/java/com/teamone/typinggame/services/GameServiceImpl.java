@@ -113,6 +113,7 @@ public class GameServiceImpl implements GameService {
         Game game = gameStorage.getGame(gameId);
 
         //TODO Add logic for processing user stats
+        // TODO Add logic for processing players that haven't finished the text or finished partially
 
         game.removePlayer(player);
         activeUserStorage.removeUser(player.getUserID());
@@ -125,7 +126,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    public synchronized Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException {
+    public synchronized Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
@@ -135,10 +136,32 @@ public class GameServiceImpl implements GameService {
         }
         Player player = game.getPlayer(sessionId);
 
-        if (game.getGameText().charAt(player.getPosition()) == input) {
-            player.incrementPosition();
+        String gameText = game.getGameText();
+
+        if (input == '\b' && !player.getTempIncorrectCharacters().isEmpty()) {
+            player.removeCharacter();
         }
-        return null;
+
+        if (gameText.charAt(player.getPosition()) == input) {
+            player.incrementPosition();
+        } else {
+            player.addIncorrectCharacter(input);
+        }
+
+        if (gameText.length() - 1 == player.getPosition()) {
+            if (game.getWinner() == null) {
+                game.setWinner(player);
+            }
+            if (game.getDoneCount() < game.getPlayerCount()) {
+                game.incrementDoneCount();
+            }
+        }
+
+        game.updatePlayer(sessionId, player);
+        if (game.getDoneCount().equals(game.getPlayerCount())) {
+            gameEnd(game.getGameId());
+        }
+        return game;
     }
 
 

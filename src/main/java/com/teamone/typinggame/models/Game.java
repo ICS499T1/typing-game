@@ -3,7 +3,6 @@ package com.teamone.typinggame.models;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +34,10 @@ public class Game {
     private Player winner;
 
     @Getter
+    @Setter
+    private Integer doneCount;
+
+    @Getter
     private Integer playerCount;
 
     public Game(String gameId) {
@@ -45,7 +48,7 @@ public class Game {
     }
 
     public boolean addPlayer(String sessionId, Player player) {
-        if (playerCount < 5 ) {
+        if (playerCount <= gameConfig.getMaxNumOfPlayers() ) {
             playerCount++;
             players.put(sessionId, player);
             return true;
@@ -74,10 +77,15 @@ public class Game {
         status = IN_PROGRESS;
         gameText = "Random paragraph";
         winner = null;
-        players.forEach((sessionId, player) -> {
-            player.setPosition(0);
-            player.setIncorrectCharacters(new ArrayList<>());
-        });
-        System.currentTimeMillis();
+        players.forEach((sessionId, player) -> player.reset());
+        startTime = System.currentTimeMillis();
+    }
+
+    public void updatePlayer(String sessionId, Player player) {
+        players.put(sessionId, player);
+    }
+
+    public void incrementDoneCount() {
+        doneCount++;
     }
 }
