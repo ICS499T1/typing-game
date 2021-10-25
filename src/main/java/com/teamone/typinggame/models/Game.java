@@ -54,7 +54,7 @@ public class Game {
     }
 
     public boolean addPlayer(String sessionId, Player player) {
-        if (playerCount <= gameConfig.getMaxNumOfPlayers() ) {
+        if (playerCount <= 4 ) {
             playerCount++;
             players.put(sessionId, player);
             return true;

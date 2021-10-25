@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
         Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
         user.setUserStats(userStats);
         userStats.setUser(user);
+        // TODO: remove keystats values
         KeyStats keyStats = new KeyStats('a', 5, 10, user);
         KeyStats keyStats2 = new KeyStats('b', 10, 10, user);
         List<KeyStats> keyStatsList= new ArrayList<>();

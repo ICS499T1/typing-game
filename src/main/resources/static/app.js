@@ -1,4 +1,6 @@
+// Used for testing, cannot be used for prod
 var stompClient = null;
+let gameId = null;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -9,7 +11,7 @@ function setConnected(connected) {
     else {
         $("#conversation").hide();
     }
-    $("#greetings").html("");
+    $("#games").html("");
 }
 
 function connect() {
@@ -18,9 +20,13 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/game/sendhere', function (user) {
-            showUser(JSON.parse(user.body).content);
+
+        stompClient.subscribe('/game/initialize', function (game) {
+            gameId = JSON.parse(game.body).gameId;
+            showUser(JSON.parse(game.body).gameId);
+            resubscribeToGame();
         });
+
     });
 }
 
@@ -36,8 +42,21 @@ function sendName() {
     stompClient.send("/app/create", {}, JSON.stringify({'username': $("#name").val()}));
 }
 
+function resubscribeToGame() {
+    stompClient.unsubscribe();
+    stompClient.subscribe("/game/join/" + gameId, function() {
+            console.log("Joined the game with Id " + gameId);
+    });
+}
+
+function joinGame() {
+    if (gameId !== null) {
+        stompClient.send("/app/join/" + gameId, {}, JSON.stringify({'username': $("#name").val()}));
+    }
+}
+
 function showUser(message) {
-    $("#greetings").append("<tr><td>" + message + "</td></tr>");
+    $("#games").append("<tr><td>" + message + "</td></tr>");
 }
 
 $(function () {
@@ -47,4 +66,5 @@ $(function () {
     $( "#connect" ).click(function() { connect(); });
     $( "#disconnect" ).click(function() { disconnect(); });
     $( "#send" ).click(function() { sendName(); });
+    $( "#join" ).click(function() { joinGame(); });
 });

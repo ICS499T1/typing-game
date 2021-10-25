@@ -23,12 +23,16 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public synchronized Game createGame(String sessionId, User user) throws UserNotFoundException, ActiveUserException {
-        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
+/*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
+            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
+        }*/
+        if ((user = userRepository.findByUsername(user.getUsername())) == null) {
             throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
         }
         if (activeUserStorage.contains(user)) {
             throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
         }
+        System.out.println("GameServiceImpl: " + user);
         Game game = new Game(UUID.randomUUID().toString());
         Player player = new Player(user, game.getGameId());
         game.addPlayer(sessionId, player);
@@ -54,7 +58,10 @@ public class GameServiceImpl implements GameService {
         if (game.getStatus() == IN_PROGRESS) {
             throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
         }
-        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
+/*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
+            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
+        }*/
+        if ((user = userRepository.findByUsername(user.getUsername())) == null) {
             throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
         }
         Player player = new Player(user, gameId);

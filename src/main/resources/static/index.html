@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello WebSocket</title>
+    <title>WebSocket Test</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet">
     <script src="/webjars/jquery/jquery.min.js"></script>
@@ -28,10 +28,11 @@
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
-                    <label for="name">What is your name?</label>
-                    <input type="text" id="name" class="form-control" placeholder="Your name here...">
+                    <label for="name">What's the username?</label>
+                    <input type="text" id="name" class="form-control" placeholder="Username...">
                 </div>
-                <button id="send" class="btn btn-default" type="submit">Send</button>
+                <button id="send" class="btn btn-default" type="submit">Create</button>
+                <button id="join" class="btn btn-default" type="submit">Join</button>
             </form>
         </div>
     </div>
@@ -40,10 +41,10 @@
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Greetings</th>
+                    <th>Games</th>
                 </tr>
                 </thead>
-                <tbody id="greetings">
+                <tbody id="games">
                 </tbody>
             </table>
         </div>
