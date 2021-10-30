@@ -1,4 +1,4 @@
-package com.teamone.typinggame.services;
+package com.teamone.typinggame.services.game;
 
 import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.*;

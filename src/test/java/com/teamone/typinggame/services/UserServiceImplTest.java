@@ -2,6 +2,7 @@ package com.teamone.typinggame.services;
 
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
+import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

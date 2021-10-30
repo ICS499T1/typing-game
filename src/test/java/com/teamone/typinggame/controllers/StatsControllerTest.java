@@ -1,7 +1,7 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.Stats;
-import com.teamone.typinggame.services.StatsServiceImpl;
+import com.teamone.typinggame.services.user.StatsServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

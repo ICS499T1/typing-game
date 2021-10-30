@@ -1,7 +1,7 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.models.User;
-import com.teamone.typinggame.services.UserServiceImpl;
+import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

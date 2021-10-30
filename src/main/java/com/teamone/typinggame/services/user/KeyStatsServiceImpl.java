@@ -1,11 +1,10 @@
-package com.teamone.typinggame.services;
+package com.teamone.typinggame.services.user;
 
 import com.teamone.typinggame.models.KeyStats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.KeyStatsRepository;
 import com.teamone.typinggame.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

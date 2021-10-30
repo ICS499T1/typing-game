@@ -1,6 +1,7 @@
 // Used for testing, cannot be used for prod
 var stompClient = null;
 let gameId = null;
+let username = null;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -15,13 +16,14 @@ function setConnected(connected) {
 }
 
 function connect() {
+    username = $("#name").val();
     var socket = new SockJS('/new-player');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
 
-        stompClient.subscribe('/game/initialize', function (game) {
+        stompClient.subscribe('/game/' + username, function (game) {
             gameId = JSON.parse(game.body).gameId;
             showUser(JSON.parse(game.body).gameId);
             resubscribeToGame();

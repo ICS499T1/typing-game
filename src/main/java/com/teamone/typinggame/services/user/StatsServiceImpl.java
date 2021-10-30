@@ -1,4 +1,4 @@
-package com.teamone.typinggame.services;
+package com.teamone.typinggame.services.user;
 
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.repositories.StatsRepository;
