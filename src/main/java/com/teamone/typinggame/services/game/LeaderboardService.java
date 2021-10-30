@@ -2,9 +2,8 @@ package com.teamone.typinggame.services.game;
 
 import com.teamone.typinggame.models.User;
 
-import java.util.List;
-
+import java.util.Collection;
 
 public interface LeaderboardService {
-    public List<User> fetchTopPlayers();
+    public Collection<User> fetchTopPlayers();
 }
