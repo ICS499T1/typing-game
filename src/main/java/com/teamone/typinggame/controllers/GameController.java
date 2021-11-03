@@ -19,14 +19,6 @@ public class GameController {
     private final PlayerServiceImpl playerService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    @GetMapping("/usertest")
-    public void userTest(@Header("simpSessionId") String sessionId, @RequestBody User user) throws UserNotFoundException, ActiveUserException {
-        if (user != null) {
-            Game game = gameService.createGame(sessionId, user);
-            System.out.println("Game ID: " + game.getGameId());
-        } else System.out.println("The user is null.");
-    }
-
     @MessageMapping("/create")
     public void createGame(@Header("simpSessionId") String sessionId, User user) throws UserNotFoundException, ActiveUserException {
         Game game = gameService.createGame(sessionId, user);

@@ -43,7 +43,7 @@ public class Game {
     @Getter
     private Integer playerCount;
 
-    private GameConfig gameConfig;
+    private GameConfig gameConfig = new GameConfig();
 
     public Game(String gameId) {
         this.gameId = gameId;
@@ -53,7 +53,7 @@ public class Game {
     }
 
     public boolean addPlayer(String sessionId, Player player) {
-        if (playerCount <= gameConfig.getMaxNumOfPlayers()) {
+        if (playerCount <= gameConfig.getMaxPlayers()) {
             playerCount++;
             players.put(sessionId, player);
             return true;
