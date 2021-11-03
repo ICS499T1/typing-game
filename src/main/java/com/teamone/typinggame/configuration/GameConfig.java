@@ -1,14 +1,22 @@
 package com.teamone.typinggame.configuration;
 
-import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@Data
+@RequiredArgsConstructor
 public class GameConfig {
 
     @Value("${game.max-players}")
     private int maxNumOfPlayers;
 
+    public int getMaxNumOfPlayers() {
+        return maxNumOfPlayers;
+    }
+
+    public void setMaxNumOfPlayers(int maxNumOfPlayers) {
+        this.maxNumOfPlayers = maxNumOfPlayers;
+    }
 }

@@ -32,7 +32,7 @@ public class GameServiceImpl implements GameService {
         if (activeUserStorage.contains(user)) {
             throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
         }
-        System.out.println("GameServiceImpl: " + user);
+        // System.out.println("GameServiceImpl: " + user);
         Game game = new Game(UUID.randomUUID().toString());
         Player player = new Player(user, game.getGameId());
         game.addPlayer(sessionId, player);

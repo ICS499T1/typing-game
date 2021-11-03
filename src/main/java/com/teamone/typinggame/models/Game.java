@@ -10,12 +10,9 @@ import java.util.Map;
 
 import static com.teamone.typinggame.models.GameStatus.*;
 
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class Game {
-
-    @Autowired
-    private GameConfig gameConfig;
 
     @Getter
     private String gameId;
@@ -46,6 +43,8 @@ public class Game {
     @Getter
     private Integer playerCount;
 
+    private GameConfig gameConfig;
+
     public Game(String gameId) {
         this.gameId = gameId;
         this.players = new HashMap<>();
@@ -54,7 +53,7 @@ public class Game {
     }
 
     public boolean addPlayer(String sessionId, Player player) {
-        if (playerCount <= 4 ) {
+        if (playerCount <= gameConfig.getMaxNumOfPlayers()) {
             playerCount++;
             players.put(sessionId, player);
             return true;
