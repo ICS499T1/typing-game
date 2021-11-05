@@ -1,17 +1,22 @@
 package com.teamone.typinggame.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 @Entity
 @Table(name = "users")
-public class User {
+@Getter
+@Setter
+public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "userID", nullable = false)
@@ -20,6 +25,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+
+    @Column(nullable = false)
+    private String password;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = false)
     @PrimaryKeyJoinColumn
     private Stats userStats;
@@ -27,6 +36,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 //    @JoinColumn(name="userID", nullable = false)
     private List<KeyStats> allKeys;
+
+//    private Boolean locked = false;
+//    private Boolean enabled = false;
 
     public Long getUserID() {
         return userID;
@@ -39,8 +51,39 @@ public class User {
         this.username = username;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("USER");
+        return Collections.singletonList(authority);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setUsername(String username) {

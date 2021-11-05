@@ -1,5 +1,6 @@
 package com.teamone.typinggame.controllers;
 
+import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public User newUser(@RequestBody User user) {
+    public User newUser(@RequestBody User user) throws UserAlreadyExistsException {
         return userServiceImpl.newUser(user);
     }
 

@@ -1,37 +1,43 @@
 package com.teamone.typinggame.services.user;
 
-import com.teamone.typinggame.models.KeyStats;
+import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
 import com.teamone.typinggame.storage.ActiveUserStorage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public User newUser(User user) {
+    public User newUser(User user) throws UserAlreadyExistsException {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            throw new UserAlreadyExistsException(user.getUsername() + " already exists.");
+        }
+
+        System.out.println(user.getUsername());
+        System.out.println(user.getPassword());
+        String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
         Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
         user.setUserStats(userStats);
         userStats.setUser(user);
-        // TODO: remove keystats values
-        KeyStats keyStats = new KeyStats('a', 5, 10, user);
-        KeyStats keyStats2 = new KeyStats('b', 10, 10, user);
-        List<KeyStats> keyStatsList= new ArrayList<>();
-        keyStatsList.add(keyStats);
-        keyStatsList.add(keyStats2);
-        user.setAllKeys(keyStatsList);
         return userRepository.saveAndFlush(user);
     }
 
@@ -41,5 +47,14 @@ public class UserServiceImpl implements UserService {
 
     public void removeActiveUser(Long userID) {
         activeUserStorage.removeUser(userID);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(username + " not found.");
+        }
+        return user;
     }
 }
