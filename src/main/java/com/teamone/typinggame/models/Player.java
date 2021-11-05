@@ -16,9 +16,9 @@ public class Player {
 
     private Integer position;
 
-    private List<Character> permanentIncorrectCharacters;
+    private List<Character> failedCharacters;
 
-    private Stack<Character> tempIncorrectCharacters;
+    private Stack<Character> incorrectCharacters;
 
     private String gameId;
 
@@ -30,8 +30,8 @@ public class Player {
         this.userID = user.getUserID();
         this.gameId = gameId;
         this.position = 0;
-        this.tempIncorrectCharacters = new Stack<>();
-        this.permanentIncorrectCharacters = new ArrayList<>();
+        this.incorrectCharacters = new Stack<>();
+        this.failedCharacters = new ArrayList<>();
     }
 
 //    @Override
@@ -48,19 +48,22 @@ public class Player {
         position++;
     }
 
-    public void addIncorrectCharacter(Character character) {
-        permanentIncorrectCharacters.add(character);
-        tempIncorrectCharacters.add(character);
+    public void addFailedCharacter(Character character) {
+        failedCharacters.add(character);
     }
 
-    public void removeCharacter() {
-        tempIncorrectCharacters.pop();
+    public void addIncorrectCharacter(Character character) {
+        incorrectCharacters.add(character);
+    }
+
+    public void removeIncorrectCharacter() {
+        incorrectCharacters.pop();
     }
 
     public void reset() {
         position = 0;
-        permanentIncorrectCharacters = new ArrayList<>();
-        tempIncorrectCharacters = new Stack<>();
+        failedCharacters = new ArrayList<>();
+        incorrectCharacters = new Stack<>();
         winner = false;
         endTime = 0L;
     }

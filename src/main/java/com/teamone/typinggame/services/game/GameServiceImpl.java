@@ -9,6 +9,7 @@ import com.teamone.typinggame.storage.PlayerStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.teamone.typinggame.models.GameStatus.*;
@@ -22,20 +23,31 @@ public class GameServiceImpl implements GameService {
     private final UserRepository userRepository;
 
     @Override
-    public synchronized Game createGame(String sessionId, User user) throws UserNotFoundException, ActiveUserException {
+    public String generateGameId() {
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public synchronized Game createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
 /*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
             throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
         }*/
-        if ((user = userRepository.findByUsername(user.getUsername())) == null) {
-            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
+        String username = user.getUsername();
+        if (gameStorage.contains(gameId)) {
+            throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
+        }
+        if ((user = userRepository.findByUsername(username)) == null) {
+            throw new UserNotFoundException("User " + username + " does not exist.");
         }
         if (activeUserStorage.contains(user)) {
-            throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
+            throw new ActiveUserException("User " + username + " is already in a game.");
         }
         // System.out.println("GameServiceImpl: " + user);
-        Game game = new Game(UUID.randomUUID().toString());
+        Game game = new Game(gameId);
         Player player = new Player(user, game.getGameId());
         game.addPlayer(sessionId, player);
+        // TODO remove this later, find another solution for single player
+        game.setStatus(READY);
         activeUserStorage.addUser(user);
         playerStorage.addPlayer(sessionId, player);
         gameStorage.addGame(game);
@@ -61,8 +73,9 @@ public class GameServiceImpl implements GameService {
 /*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
             throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
         }*/
-        if ((user = userRepository.findByUsername(user.getUsername())) == null) {
-            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
+        String username = user.getUsername();
+        if ((user = userRepository.findByUsername(username)) == null) {
+            throw new UserNotFoundException("User " + username + " does not exist.");
         }
         Player player = new Player(user, gameId);
         activeUserStorage.addUser(user);
@@ -102,7 +115,8 @@ public class GameServiceImpl implements GameService {
 
         //TODO Add logic for processing user stats
 
-        if (playerCount > 1) {
+        //TODO change it to playerCount>1 once multiplayer ready
+        if (playerCount > 0) {
             game.setStatus(READY);
         } else {
             game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
@@ -143,20 +157,27 @@ public class GameServiceImpl implements GameService {
         }
         Player player = game.getPlayer(sessionId);
 
-        String gameText = game.getGameText();
+        List<Character> gameText = game.getGameText();
 
-        if (input == '\b' && !player.getTempIncorrectCharacters().isEmpty()) {
-            player.removeCharacter();
-        }
-
-        if (gameText.charAt(player.getPosition()) == input) {
+        if (!player.getIncorrectCharacters().isEmpty()) {
+            if (input == '\b') {
+                player.removeIncorrectCharacter();
+            } else {
+                player.addIncorrectCharacter(input);
+            }
+        } else if (input == '\b') {
+            return game;
+        } else if (gameText.get(player.getPosition()) == input) {
             player.incrementPosition();
         } else {
+            player.addFailedCharacter(gameText.get(player.getPosition()));
             player.addIncorrectCharacter(input);
         }
 
-        if (gameText.length() - 1 == player.getPosition()) {
+        if (gameText.size() == player.getPosition()) {
+            player.setEndTime(System.currentTimeMillis());
             if (game.getWinner() == null) {
+                player.setWinner(true);
                 game.setWinner(player);
             }
             if (game.getDoneCount() < game.getPlayerCount()) {
@@ -166,8 +187,9 @@ public class GameServiceImpl implements GameService {
 
         game.updatePlayer(sessionId, player);
         if (game.getDoneCount().equals(game.getPlayerCount())) {
-            gameEnd(game.getGameId());
+            return gameEnd(game.getGameId());
         }
+        gameStorage.addGame(game);
         return game;
     }
 

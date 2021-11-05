@@ -5,7 +5,9 @@ import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.teamone.typinggame.models.GameStatus.*;
@@ -23,7 +25,7 @@ public class Game {
 
     @Getter
     @Setter
-    private String gameText;
+    private List<Character> gameText;
 
     @Getter
     private Map<String, Player> players;
@@ -50,6 +52,7 @@ public class Game {
         this.players = new HashMap<>();
         this.playerCount = 0;
         this.status = WAITING_FOR_ANOTHER_PLAYER;
+        this.doneCount = 0;
     }
 
     public boolean addPlayer(String sessionId, Player player) {
@@ -80,9 +83,27 @@ public class Game {
 
     public void reset() {
         status = IN_PROGRESS;
-        gameText = "Random paragraph";
+        gameText = new ArrayList<>();
+        gameText.add('R');
+        gameText.add('a');
+        gameText.add('n');
+        gameText.add('d');
+        gameText.add('o');
+        gameText.add('m');
+        gameText.add(' ');
+        gameText.add('p');
+        gameText.add('a');
+        gameText.add('r');
+        gameText.add('a');
+        gameText.add('g');
+        gameText.add('r');
+        gameText.add('a');
+        gameText.add('p');
+        gameText.add('h');
+
         winner = null;
         players.forEach((sessionId, player) -> player.reset());
+        doneCount = 0;
         startTime = System.currentTimeMillis();
     }
 
