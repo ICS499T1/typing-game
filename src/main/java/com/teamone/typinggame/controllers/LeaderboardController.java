@@ -20,7 +20,7 @@ public class LeaderboardController {
     @CrossOrigin
     @GetMapping
     public Collection<User> getTopUsers() {
-        return leaderboardService.fetchTopPlayers();
+        return leaderboardService.fetchTopUsers();
     }
 
 }

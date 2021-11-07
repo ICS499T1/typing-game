@@ -11,6 +11,6 @@ import java.util.Map;
 public interface UserRepository extends JpaRepository<User, Long> {
     public User findByUsername(String username);
 
-    @Query(value = "SELECT users.userid, users.username, stats.average_speed FROM users INNER JOIN stats ON stats.userid=users.userid ORDER BY stats.average_speed DESC LIMIT 20", nativeQuery = true)
+    @Query(value = "SELECT users.userid, users.username, users.password, stats.average_speed FROM users INNER JOIN stats ON stats.userid=users.userid ORDER BY stats.average_speed DESC LIMIT 20", nativeQuery = true)
     Collection<User> fetchTopTwentyUsers();
 }

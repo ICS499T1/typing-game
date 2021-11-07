@@ -13,9 +13,8 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     @Autowired
     private UserRepository userRepository;
 
-
     @Override
-    public Collection<User> fetchTopPlayers() {
+    public Collection<User> fetchTopUsers() {
         return userRepository.fetchTopTwentyUsers();
     }
 }
