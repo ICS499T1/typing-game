@@ -1,10 +1,14 @@
 package com.teamone.typinggame.services.user;
 
+import com.teamone.typinggame.exceptions.IncorrectPasswordException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
+import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
 import com.teamone.typinggame.storage.ActiveUserStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +24,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
 
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class.getName());
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
@@ -30,9 +36,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistsException(user.getUsername() + " already exists.");
         }
-
-        System.out.println(user.getUsername());
-        System.out.println(user.getPassword());
         String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         Stats userStats = new Stats(user, 0.0, 0, 0, 0, 0, 0);
@@ -41,12 +44,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.saveAndFlush(user);
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
-
     public void removeActiveUser(Long userID) {
         activeUserStorage.removeUser(userID);
+    }
+
+    public User authorizeUser(User user) {
+        try {
+            UserDetails loadedUser = loadUserByUsername(user.getUsername());
+            if (bCryptPasswordEncoder.matches(user.getPassword(), loadedUser.getPassword())) return user;
+            else throw new IncorrectPasswordException("The password is not correct.");
+        } catch (UsernameNotFoundException ex) {
+            logger.error("authorizeUser -> ", ex);
+        } catch (Exception ex) {
+            logger.error("authorizeUser -> ", ex);
+        }
+        return null;
     }
 
     @Override

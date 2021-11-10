@@ -26,6 +26,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // this is where you add urls so that you can access them without authorization
                 // more specific ones go on top, and generic ones go on the bottom (generic ones include * in them)
                 .antMatchers("/user/add").permitAll()
+                .antMatchers("/user/info").permitAll()
                 .antMatchers("/leaderboard").permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -1,6 +1,7 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
+import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,10 @@ public class UserController {
         return userServiceImpl.newUser(user);
     }
 
-    @GetMapping("/getusers")
-    public List<User> getUsers() {
-        return userServiceImpl.getUsers();
+    @GetMapping("/info")
+    public User userInfo(@RequestBody User user) {
+        User loadedUser = userServiceImpl.authorizeUser(user);
+        if (loadedUser != null) return loadedUser;
+        else throw new IllegalStateException("Incorrect credentials.");
     }
 }
