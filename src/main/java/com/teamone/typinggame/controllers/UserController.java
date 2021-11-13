@@ -5,6 +5,7 @@ import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,12 @@ public class UserController {
     @PostMapping("/add")
     public User newUser(@RequestBody User user) throws UserAlreadyExistsException {
         return userServiceImpl.newUser(user);
+    }
+
+    @PostAuthorize("returnObject.username == authentication.name")
+    @PostMapping("/getuser")
+    public UserDetails getUser(@RequestParam("username") String username) {
+        return userServiceImpl.loadUserByUsername(username);
     }
 
     @PostMapping("/info")
