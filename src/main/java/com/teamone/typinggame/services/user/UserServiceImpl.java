@@ -15,10 +15,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -48,10 +50,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         activeUserStorage.removeUser(userID);
     }
 
-    public User authorizeUser(User user) {
+    public UserDetails authorizeUser(User user) {
         try {
             UserDetails loadedUser = loadUserByUsername(user.getUsername());
-            if (bCryptPasswordEncoder.matches(user.getPassword(), loadedUser.getPassword())) return user;
+            if (bCryptPasswordEncoder.matches(user.getPassword(), loadedUser.getPassword())) return loadedUser;
             else throw new IncorrectPasswordException("The password is not correct.");
         } catch (UsernameNotFoundException ex) {
             logger.error("authorizeUser -> ", ex);

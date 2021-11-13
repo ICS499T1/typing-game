@@ -5,6 +5,7 @@ import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,9 +26,9 @@ public class UserController {
         return userServiceImpl.newUser(user);
     }
 
-    @GetMapping("/info")
-    public User userInfo(@RequestBody User user) {
-        User loadedUser = userServiceImpl.authorizeUser(user);
+    @PostMapping("/info")
+    public UserDetails userInfo(@RequestBody User user) {
+        UserDetails loadedUser = userServiceImpl.authorizeUser(user);
         if (loadedUser != null) return loadedUser;
         else throw new IllegalStateException("Incorrect credentials.");
     }

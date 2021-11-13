@@ -8,6 +8,8 @@ import com.teamone.typinggame.services.game.PlayerServiceImpl;
 import lombok.Data;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ public class GameController {
 //        simpMessagingTemplate.convertAndSend("/game/" + user.getUsername(), game);
 //    }
 
+//    @PreAuthorize("#user.username == authentication.name")
     @GetMapping("/get-game-id")
     public String getGameId() {
         return gameService.generateGameId();
