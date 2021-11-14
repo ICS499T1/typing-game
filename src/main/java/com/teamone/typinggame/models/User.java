@@ -16,7 +16,7 @@ import java.util.*;
 @Table(name = "users")
 @Getter
 @Setter
-//@JsonIgnoreProperties(value={"password"})
+@JsonIgnoreProperties(value={"password"})
 public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

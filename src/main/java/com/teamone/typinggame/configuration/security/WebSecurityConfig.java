@@ -3,6 +3,7 @@ package com.teamone.typinggame.configuration.security;
 import com.teamone.typinggame.configuration.security.filters.CustomAuthenticationFilter;
 import com.teamone.typinggame.configuration.security.filters.CustomAuthorizationFilter;
 import com.teamone.typinggame.services.user.UserServiceImpl;
+import com.teamone.typinggame.utilities.AuthToken;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +30,12 @@ import java.util.Arrays;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserServiceImpl userService;
+    private final AuthToken authToken;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter authenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
+        CustomAuthenticationFilter authenticationFilter = new CustomAuthenticationFilter(authToken, authenticationManagerBean());
         CustomAuthorizationFilter authorizationFilter = new CustomAuthorizationFilter();
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
@@ -41,6 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // more specific ones go on top, and generic ones go on the bottom (generic ones include * in them)
                 .antMatchers("/user/add").permitAll()
                 .antMatchers("/user/info").permitAll()
+                .antMatchers("/user/refresh").permitAll()
                 .antMatchers("/leaderboard").permitAll()
                 .anyRequest().authenticated()
                 .and()
