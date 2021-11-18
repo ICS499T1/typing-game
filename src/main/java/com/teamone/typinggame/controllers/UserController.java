@@ -1,6 +1,7 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
+import com.teamone.typinggame.models.SignUp;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import com.teamone.typinggame.utilities.AuthToken;
@@ -30,7 +31,10 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public User newUser(@RequestBody User user) throws UserAlreadyExistsException {
+    public User newUser(@RequestBody SignUp signUpInfo) throws UserAlreadyExistsException {
+        User user = new User();
+        user.setUsername(signUpInfo.getUsername());
+        user.setPassword(signUpInfo.getPassword());
         return userServiceImpl.newUser(user);
     }
 

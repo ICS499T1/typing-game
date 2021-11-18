@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    @Override
     public User newUser(User user) throws UserAlreadyExistsException {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistsException(user.getUsername() + " already exists.");
