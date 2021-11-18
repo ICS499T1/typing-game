@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class AuthToken {
     public String createAccessToken(HttpServletRequest request, User user){
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 60 * 1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 15 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
@@ -46,13 +47,14 @@ public class AuthToken {
     public String createRefreshToken(HttpServletRequest request, User user) {
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 30 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
         return refreshToken;
     }
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {

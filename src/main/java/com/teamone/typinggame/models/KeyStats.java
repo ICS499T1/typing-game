@@ -12,7 +12,7 @@ import java.util.Map;
         name = "key_stats",
         uniqueConstraints =
             @UniqueConstraint(columnNames = {"userID", "character"}))
-@JsonIgnoreProperties(value={"user"})
+@JsonIgnoreProperties({"user", "keyID"})
 public class KeyStats {
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
