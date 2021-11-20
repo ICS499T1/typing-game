@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.teamone.typinggame.models.GameStatus.*;
@@ -48,7 +49,6 @@ public class GameServiceImpl implements GameService {
         game.addPlayer(sessionId, player);
         // TODO find another solution for single player
         activeUserStorage.addUser(user);
-        playerStorage.addPlayer(sessionId, player);
         gameStorage.addGame(game);
         return game;
     }
@@ -80,11 +80,8 @@ public class GameServiceImpl implements GameService {
         Player player = new Player(user, gameId);
 
         activeUserStorage.addUser(user);
-        System.out.println("connect to game user " + activeUserStorage.contains(user));
         playerStorage.addPlayer(sessionId, player);
-        System.out.println("player storage contains " + playerStorage.contains(player));
         game.addPlayer(sessionId, player);
-        System.out.println("game contains " + game.containsPlayer(sessionId));
         game.setStatus(READY);
         gameStorage.addGame(game);
         return game;

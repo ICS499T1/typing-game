@@ -26,7 +26,7 @@ public class ActiveUserStorage {
     }
 
     public synchronized boolean contains(User user) {
-        return activeUsers.containsKey(user.getUserID());
+        return activeUsers.containsValue(user);
     }
 
     public synchronized void removeUser(User user) {
