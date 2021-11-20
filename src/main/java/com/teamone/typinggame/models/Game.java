@@ -4,6 +4,7 @@ import com.teamone.typinggame.configuration.GameConfig;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class Game {
     }
 
     public boolean addPlayer(String sessionId, Player player) {
-        if (playerCount <= gameConfig.getMaxPlayers()) {
+        if (playerCount <= 4) {
             playerCount++;
             players.put(sessionId, player);
             return true;
@@ -84,22 +85,15 @@ public class Game {
     public void reset() {
         status = IN_PROGRESS;
         gameText = new ArrayList<>();
-        gameText.add('R');
-        gameText.add('a');
-        gameText.add('n');
-        gameText.add('d');
-        gameText.add('o');
-        gameText.add('m');
-        gameText.add(' ');
-        gameText.add('p');
-        gameText.add('a');
-        gameText.add('r');
-        gameText.add('a');
-        gameText.add('g');
-        gameText.add('r');
-        gameText.add('a');
-        gameText.add('p');
-        gameText.add('h');
+        String url = "http://metaphorpsum.com/paragraphs/1/10";
+        RestTemplate restTemplate = new RestTemplate();
+        String paragraph = restTemplate.getForObject(url, String.class);
+
+        char[] characterArray = paragraph.toCharArray();
+        for(char c : characterArray)//iterating through the character array
+            gameText.add(c);
+
+
 
         winner = null;
         players.forEach((sessionId, player) -> player.reset());

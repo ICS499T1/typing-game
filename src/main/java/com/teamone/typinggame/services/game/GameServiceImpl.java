@@ -46,8 +46,7 @@ public class GameServiceImpl implements GameService {
         Game game = new Game(gameId);
         Player player = new Player(user, game.getGameId());
         game.addPlayer(sessionId, player);
-        // TODO remove this later, find another solution for single player
-        game.setStatus(READY);
+        // TODO find another solution for single player
         activeUserStorage.addUser(user);
         playerStorage.addPlayer(sessionId, player);
         gameStorage.addGame(game);
@@ -77,10 +76,15 @@ public class GameServiceImpl implements GameService {
         if ((user = userRepository.findByUsername(username)) == null) {
             throw new UserNotFoundException("User " + username + " does not exist.");
         }
+
         Player player = new Player(user, gameId);
+
         activeUserStorage.addUser(user);
+        System.out.println("connect to game user " + activeUserStorage.contains(user));
         playerStorage.addPlayer(sessionId, player);
+        System.out.println("player storage contains " + playerStorage.contains(player));
         game.addPlayer(sessionId, player);
+        System.out.println("game contains " + game.containsPlayer(sessionId));
         game.setStatus(READY);
         gameStorage.addGame(game);
         return game;

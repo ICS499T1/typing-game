@@ -45,6 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/info").permitAll()
                 .antMatchers("/user/refresh").permitAll()
                 .antMatchers("/leaderboard").permitAll()
+                .antMatchers("/new-player/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(corsFilter())
