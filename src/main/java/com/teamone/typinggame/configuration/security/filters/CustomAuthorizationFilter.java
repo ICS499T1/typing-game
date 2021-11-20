@@ -31,6 +31,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().equals("/login") || request.getServletPath().equals("/user/refresh")) {
+            response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+            response.setHeader("Access-Control-Allow-Credentials", "true");
             filterChain.doFilter(request, response);
             return;
         }
@@ -50,6 +52,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+                response.setHeader("Access-Control-Allow-Credentials", "true");
                 filterChain.doFilter(request, response);
             } catch (Exception exception) {
                 log.error("Error logging in: {}", exception.getMessage());
@@ -63,6 +67,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             }
 
         } else {
+            response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+            response.setHeader("Access-Control-Allow-Credentials", "true");
             filterChain.doFilter(request, response);
         }
     }
