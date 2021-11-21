@@ -22,6 +22,7 @@ public class GameServiceImpl implements GameService {
     private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
     private final PlayerStorage playerStorage = PlayerStorage.getInstance();
     private final UserRepository userRepository;
+    private final Object lockObject = new Object();
 
     @Override
     public String generateGameId() {
@@ -29,61 +30,65 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public synchronized Game createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
-/*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
-            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
-        }*/
+    public Game createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
         String username = user.getUsername();
-        if (gameStorage.contains(gameId)) {
-            throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
-        }
+
         if ((user = userRepository.findByUsername(username)) == null) {
             throw new UserNotFoundException("User " + username + " does not exist.");
         }
-        if (activeUserStorage.contains(user)) {
-            throw new ActiveUserException("User " + username + " is already in a game.");
-        }
-        // System.out.println("GameServiceImpl: " + user);
+
         Game game = new Game(gameId);
         Player player = new Player(user, game.getGameId());
         game.addPlayer(sessionId, player);
-        // TODO find another solution for single player
-        activeUserStorage.addUser(user);
-        gameStorage.addGame(game);
-        return game;
+
+        synchronized (lockObject) {
+            if (gameStorage.contains(gameId)) {
+                throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
+            }
+
+            if (activeUserStorage.contains(user)) {
+                throw new ActiveUserException("User " + username + " is already in a game.");
+            }
+
+            // TODO find another solution for single player
+            activeUserStorage.addUser(user);
+            gameStorage.addGame(game);
+            return game;
+        }
     }
 
     @Override
-    public synchronized Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException {
+    public Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
-        if (activeUserStorage.contains(user)) {
-            throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
-        }
-        Game game = gameStorage.getGame(gameId);
-
-        if (game.getPlayerCount() > 3) {
-            throw new InvalidGameStateException("Game " + gameId + " is already full.");
-        }
-        if (game.getStatus() == IN_PROGRESS) {
-            throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
-        }
-/*        if ((user = userRepository.findById(user.getUserID()).orElse(null)) == null) {
-            throw new UserNotFoundException("User " + user.getUsername() + " does not exist.");
-        }*/
         String username = user.getUsername();
         if ((user = userRepository.findByUsername(username)) == null) {
             throw new UserNotFoundException("User " + username + " does not exist.");
         }
 
+        Game game = gameStorage.getGame(gameId);
         Player player = new Player(user, gameId);
 
-        activeUserStorage.addUser(user);
-        playerStorage.addPlayer(sessionId, player);
-        game.addPlayer(sessionId, player);
-        game.setStatus(READY);
-        gameStorage.addGame(game);
+
+        synchronized (lockObject) {
+            if (activeUserStorage.contains(user)) {
+                throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
+            }
+
+            if (game.getPlayerCount() > 3) {
+                throw new InvalidGameStateException("Game " + gameId + " is already full.");
+            }
+            if (game.getStatus() == IN_PROGRESS) {
+                throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
+            }
+
+            activeUserStorage.addUser(user);
+            playerStorage.addPlayer(sessionId, player);
+            game.addPlayer(sessionId, player);
+            game.setStatus(READY);
+        }
+
         return game;
     }
 
@@ -97,8 +102,8 @@ public class GameServiceImpl implements GameService {
         if (game.getStatus() != READY) {
             throw new InvalidGameStateException("Game " + gameId + " is not ready.");
         }
-        game.reset();
-        gameStorage.addGame(game);
+        game.setStatus(IN_PROGRESS);
+        game.setStartTime(System.currentTimeMillis());
         return game;
     }
 
@@ -112,17 +117,19 @@ public class GameServiceImpl implements GameService {
         if (game.getStatus() != IN_PROGRESS) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
+
+        Map<String, Player> players = game.getPlayers();
+
+
+
         Integer playerCount = game.getPlayerCount();
 
         //TODO Add logic for processing user stats
 
-        //TODO change it to playerCount>1 once multiplayer ready
-        if (playerCount > 0) {
-            game.setStatus(READY);
-        } else {
-            game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
-        }
 
+        game.reset();
+
+        //TODO reset game here
         gameStorage.addGame(game);
         return game;
     }
@@ -138,7 +145,7 @@ public class GameServiceImpl implements GameService {
         // TODO Add logic for processing players that haven't finished the text or finished partially
 
         game.removePlayer(player);
-        activeUserStorage.removeUser(player.getUserID());
+        activeUserStorage.removeUser(player.getUsername());
 
         if (game.getPlayerCount() < 1) {
             gameStorage.removeGame(game);
@@ -148,15 +155,16 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    public synchronized Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException {
-        if (!gameStorage.contains(gameId)) {
-            throw new GameNotFoundException("Game " + gameId + " does not exist.");
-        }
+    public Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException {
         Game game = gameStorage.getGame(gameId);
-        if (!game.containsPlayer(sessionId)) {
-            throw new PlayerNotFoundException("Player not found.");
+        if (game == null) {
+            throw new GameNotFoundException("Game " + gameId + " not found.");
         }
         Player player = game.getPlayer(sessionId);
+        if (player == null) {
+            throw new PlayerNotFoundException("Player " + sessionId + " not found.");
+        }
+        Integer position = player.getPosition();
 
         List<Character> gameText = game.getGameText();
 
@@ -168,31 +176,38 @@ public class GameServiceImpl implements GameService {
             }
         } else if (input == '\b') {
             return game;
-        } else if (gameText.get(player.getPosition()) == input) {
+        } else if (gameText.get(position) == input) {
             player.incrementPosition();
         } else {
-            player.addFailedCharacter(gameText.get(player.getPosition()));
+            player.addFailedCharacter(gameText.get(position));
             player.addIncorrectCharacter(input);
         }
 
+        // Getting player position again for updated position
         if (gameText.size() == player.getPosition()) {
             player.setEndTime(System.currentTimeMillis());
             if (game.getWinner() == null) {
-                player.setWinner(true);
                 game.setWinner(player);
-            }
-            if (game.getDoneCount() < game.getPlayerCount()) {
+            } else if (game.getDoneCount() < game.getPlayerCount()) {
                 game.incrementDoneCount();
             }
         }
 
-        game.updatePlayer(sessionId, player);
         if (game.getDoneCount().equals(game.getPlayerCount())) {
             return gameEnd(game.getGameId());
         }
-        gameStorage.addGame(game);
         return game;
     }
 
 
+    public void startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException {
+        if (!gameStorage.contains(gameId)) {
+            throw new GameNotFoundException("Game " + gameId + " does not exist.");
+        }
+        Game game = gameStorage.getGame(gameId);
+        Player player = game.getPlayer(sessionId);
+        if (game.getPlayer(sessionId).getPlayerNumber() != 1) {
+            throw new InvalidGameStateException("Player " + player.getUsername() + " is not allowed to start timer.");
+        }
+    }
 }

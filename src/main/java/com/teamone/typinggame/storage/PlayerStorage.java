@@ -4,39 +4,64 @@ import com.teamone.typinggame.models.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class PlayerStorage {
     private static Map<String, Player> players;
     private static PlayerStorage instance;
+    private final static ReadWriteLock playerStorageLock = new ReentrantReadWriteLock();
 
     private PlayerStorage() {
-        players = new HashMap<>();
+        playerStorageLock.writeLock().lock();
+        try {
+            players = new HashMap<>();
+        } finally {
+            playerStorageLock.writeLock().unlock();
+        }
     }
 
-    public static synchronized PlayerStorage getInstance() {
+    public static PlayerStorage getInstance() {
         if (instance == null) {
             instance = new PlayerStorage();
         }
         return instance;
     }
 
-    public synchronized void addPlayer(String sessionId, Player player) {
-        players.put(sessionId, player);
+    public void addPlayer(String sessionId, Player player) {
+        playerStorageLock.writeLock().lock();
+        try {
+            players.put(sessionId, player);
+        } finally {
+            playerStorageLock.writeLock().unlock();
+        }
     }
 
-//    public Player getPlayer(Long userID) {
-//        return players.get(userID);
-//    }
 
-    public synchronized boolean contains(Player player) {
-        return players.containsValue(player);
+    public boolean contains(Player player) {
+        playerStorageLock.readLock().lock();
+        try {
+            return players.containsValue(player);
+        } finally {
+            playerStorageLock.readLock().unlock();
+        }
     }
 
-    public synchronized boolean contains(String sessionId) {
-        return players.containsKey(sessionId);
+    public boolean contains(String sessionId) {
+        playerStorageLock.readLock().lock();
+        try {
+            return players.containsKey(sessionId);
+        } finally {
+            playerStorageLock.readLock().unlock();
+        }
     }
 
-    public synchronized Player removePlayer(String sessionId) {
-        return players.remove(sessionId);
+    public Player removePlayer(String sessionId) {
+        playerStorageLock.writeLock().lock();
+        try {
+            return players.remove(sessionId);
+        } finally {
+            playerStorageLock.writeLock().unlock();
+        }
     }
 }

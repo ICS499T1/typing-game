@@ -42,15 +42,21 @@ public class GameController {
         if (principal.getName().equals(user.getUsername())) {
             Game game = gameService.createGame(gameId, sessionId, user);
             simpMessagingTemplate.convertAndSend("/game/join/" + gameId, game);
+            simpMessagingTemplate.convertAndSend("/game/gameText/" + gameId, game.getGameText());
         }
+    }
+
+    @MessageMapping("/timer/{gameId}")
+    public void startTimer(@DestinationVariable(value = "gameId") String gameId, @Header("simpSessionId") String sessionId) throws InvalidGameStateException, GameNotFoundException {
+        gameService.startTimer("gameId", sessionId);
+        simpMessagingTemplate.convertAndSend("/game/startTimer/" + gameId, "startTimer");
     }
 
     // TODO add check for making sure game can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
     @MessageMapping("/start/{gameId}")
     public void startGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal) throws InvalidGameStateException, GameNotFoundException {
-        System.out.println(principal);
         Game game = gameService.gameStart(gameId);
-        simpMessagingTemplate.convertAndSend("/game/join/" + game.getGameId(), game);
+        simpMessagingTemplate.convertAndSend("/game/join/" + gameId, game);
     }
 
     @MessageMapping("/join/{gameId}")
@@ -59,20 +65,14 @@ public class GameController {
 //        System.out.println("GameController[joinGame]: " + user);
         if (principal.getName().equals(user.getUsername())) {
             Game game = gameService.connectToGame(sessionId, gameId, user);
-            simpMessagingTemplate.convertAndSend("/game/join/" + game.getGameId(), game);
+            simpMessagingTemplate.convertAndSend("/game/join/" + gameId, game);
+            simpMessagingTemplate.convertAndSend("/game/gameText/" + gameId, game.getGameText());
         }
     }
 
     @MessageMapping("/gameplay/{gameId}")
     public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException {
-//        System.out.println(input);
-//        if (input == '\b') {
-//            System.out.println("It's a backspace");
-//        }
         Game game = gameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/join/" + game.getGameId(), game);
     }
-//    @SendTo("/game/{gameid}")
-//    public Game gameMove()
-
 }

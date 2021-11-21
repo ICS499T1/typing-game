@@ -108,15 +108,15 @@ public class User implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return username.equals(user.username);
+        return (o instanceof User && ((User) o).getUsername().equals(this.username));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username);
+        if (username == null) {
+            return 0;
+        }
+        return username.hashCode();
     }
 
     @Override

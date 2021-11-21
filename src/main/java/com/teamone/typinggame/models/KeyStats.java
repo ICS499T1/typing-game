@@ -18,9 +18,9 @@ public class KeyStats {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long keyID;
-    private char character;
-    private long numFails;
-    private long numSuccesses;
+    private Character character;
+    private Long numFails;
+    private Long numSuccesses;
 
     @ManyToOne
     @JoinColumn(name="userID", nullable = false)
@@ -33,14 +33,23 @@ public class KeyStats {
     public KeyStats() {
     }
 
+    public KeyStats(Character character) {
+        this.character = character;
+
+    }
+
     public KeyStats(char character, long numFails, long numSuccesses, User user) {
         this.character = character;
         this.numFails = numFails;
         this.numSuccesses = numSuccesses;
         this.user = user;
     }
-
-    public char getCharacter() {
+    
+    public void addNumSuccesses(Long numSuccesses) { this.numSuccesses += numSuccesses; }
+    
+    public void addNumFails(Long numFails) { this.numFails += numFails; }
+    
+    public Character getCharacter() {
         return character;
     }
 
@@ -56,7 +65,7 @@ public class KeyStats {
         this.numFails = numFails;
     }
 
-    public long getNumSuccesses() {
+    public Long getNumSuccesses() {
         return numSuccesses;
     }
 

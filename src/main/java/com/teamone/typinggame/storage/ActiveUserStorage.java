@@ -5,35 +5,63 @@ import com.teamone.typinggame.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ActiveUserStorage {
-    private static Map<Long, User> activeUsers;
+    private static Map<String, User> activeUsers;
     private static ActiveUserStorage instance;
+    private final static ReadWriteLock activeUserLock = new ReentrantReadWriteLock();
 
     private ActiveUserStorage() {
-        activeUsers = new HashMap<>();
+        activeUserLock.writeLock().lock();
+        try {
+            activeUsers = new HashMap<>();
+        } finally {
+            activeUserLock.writeLock().unlock();
+        }
     }
 
-    public static synchronized ActiveUserStorage getInstance() {
+    public static ActiveUserStorage getInstance() {
         if (instance == null) {
             instance = new ActiveUserStorage();
         }
         return instance;
     }
 
-    public synchronized void addUser(User user) {
-        activeUsers.put(user.getUserID(), user);
+    public void addUser(User user) {
+        activeUserLock.writeLock().lock();
+        try {
+            activeUsers.put(user.getUsername(), user);
+        } finally {
+            activeUserLock.writeLock().unlock();
+        }
     }
 
-    public synchronized boolean contains(User user) {
-        return activeUsers.containsValue(user);
+    public boolean contains(User user) {
+        activeUserLock.readLock().lock();
+        try {
+            return activeUsers.containsKey(user.getUsername());
+        } finally {
+            activeUserLock.readLock().unlock();
+        }
     }
 
-    public synchronized void removeUser(User user) {
-        activeUsers.remove(user.getUserID());
+    public void removeUser(User user) {
+        activeUserLock.writeLock().lock();
+        try {
+            activeUsers.remove(user.getUsername());
+        } finally {
+            activeUserLock.writeLock().unlock();
+        }
     }
 
-    public synchronized void removeUser(Long userID) {
-        activeUsers.remove(userID);
+    public void removeUser(String username) {
+        activeUserLock.writeLock().lock();
+        try {
+            activeUsers.remove(username);
+        } finally {
+            activeUserLock.writeLock().unlock();
+        }
     }
 }

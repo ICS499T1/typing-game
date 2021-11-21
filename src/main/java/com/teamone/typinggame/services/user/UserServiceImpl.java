@@ -6,7 +6,6 @@ import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
-import com.teamone.typinggame.storage.ActiveUserStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class.getName());
 
@@ -45,10 +43,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setUserStats(userStats);
         userStats.setUser(user);
         return userRepository.saveAndFlush(user);
-    }
-
-    public void removeActiveUser(Long userID) {
-        activeUserStorage.removeUser(userID);
     }
 
     public UserDetails authorizeUser(User user) {

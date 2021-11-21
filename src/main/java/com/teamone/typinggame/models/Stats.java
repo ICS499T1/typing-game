@@ -25,6 +25,18 @@ public class Stats {
     private double lastRaceSpeed;
     private double bestRaceSpeed;
 
+    public void incrementRacesWon() {
+        racesWon++;
+    }
+
+    public void incrementNumSingleGamesCompleted() {
+        numSingleGamesCompleted++;
+    }
+
+    public void incrementNumMultiGamesCompleted() {
+        numMultiGamesCompleted++;
+    }
+
     public User getUser() {
         return user;
     }
