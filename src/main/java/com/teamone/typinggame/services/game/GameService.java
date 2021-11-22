@@ -11,5 +11,5 @@ public interface GameService {
     Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException;
     Game gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException;
     Game gameEnd(String gameId) throws GameNotFoundException, InvalidGameStateException;
-    void removePlayer(Player player) throws GameNotFoundException;
+    void removePlayer(String sessionId) throws GameNotFoundException;
 }

@@ -117,4 +117,17 @@ public class Stats {
         this.lastRaceSpeed = lastRaceSpeed;
         this.bestRaceSpeed = bestRaceSpeed;
     }
+
+    @Override
+    public String toString() {
+        return "Stats{" +
+                "userID=" + userID +
+                ", averageSpeed=" + averageSpeed +
+                ", numSingleGamesCompleted=" + numSingleGamesCompleted +
+                ", numMultiGamesCompleted=" + numMultiGamesCompleted +
+                ", racesWon=" + racesWon +
+                ", lastRaceSpeed=" + lastRaceSpeed +
+                ", bestRaceSpeed=" + bestRaceSpeed +
+                '}';
+    }
 }

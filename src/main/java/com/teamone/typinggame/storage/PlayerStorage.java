@@ -37,6 +37,14 @@ public class PlayerStorage {
         }
     }
 
+    public Player getPlayer(String sessionId) {
+        playerStorageLock.writeLock().lock();
+        try {
+            return players.get(sessionId);
+        } finally {
+            playerStorageLock.writeLock().unlock();
+        }
+    }
 
     public boolean contains(Player player) {
         playerStorageLock.readLock().lock();
@@ -63,5 +71,9 @@ public class PlayerStorage {
         } finally {
             playerStorageLock.writeLock().unlock();
         }
+    }
+
+    public static Map<String, Player> getPlayers() {
+        return players;
     }
 }

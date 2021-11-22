@@ -1,6 +1,7 @@
 package com.teamone.typinggame.services.user;
 
 import com.teamone.typinggame.models.Stats;
+import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.StatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,14 +15,26 @@ public class StatsServiceImpl implements StatsService {
         this.statsRepository = statsRepository;
     }
 
-    public Stats updateStatsMultiplayer(Long statsId, Double speed, Boolean victory) {
-        Stats stats = statsRepository.getById(statsId);
-        updateMultiplayerAvgSpeed(stats, speed, victory);
-        updateBestRace(stats, speed);
-        updateLastRace(stats, speed);
-        updateRacesWon(stats, victory);
-        return statsRepository.saveAndFlush(stats);
-    }
+//    public Stats updateStatsMultiplayer(User user) {
+//        // was running into lazy initialization error - no session when using getById
+//        Stats stats = statsRepository.getByUserId(user.getUserID());
+//        Stats updatedStats = user.getUserStats();
+//        stats.setRacesWon(updatedStats.getRacesWon());
+//        stats.setNumMultiGamesCompleted(updatedStats.getNumMultiGamesCompleted());
+//        stats.setBestRaceSpeed(updatedStats.getBestRaceSpeed());
+//        stats.setLastRaceSpeed(updatedStats.getLastRaceSpeed());
+//        stats.setAverageSpeed(updatedStats.getAverageSpeed());
+//        return statsRepository.saveAndFlush(stats);
+//    }
+
+//    public Stats updateStatsMultiplayer(Long statsId, Double speed, Boolean victory) {
+//        Stats stats = statsRepository.getById(statsId);
+//        updateMultiplayerAvgSpeed(stats, speed, victory);
+//        updateBestRace(stats, speed);
+//        updateLastRace(stats, speed);
+//        updateRacesWon(stats, victory);
+//        return statsRepository.saveAndFlush(stats);
+//    }
 
     public Stats updateStatsSinglePlayer(Long statsId, Double speed) {
         Stats stats = statsRepository.getById(statsId);

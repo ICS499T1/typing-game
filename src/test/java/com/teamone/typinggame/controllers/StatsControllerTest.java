@@ -52,33 +52,33 @@ class StatsControllerTest {
         System.out.println("-----Terminating stats controller tests-----");
     }
 
-    @Test
-    void updateStatsMultiplayerSuccessful() throws Exception {
-        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
+//    @Test
+//    void updateStatsMultiplayerSuccessful() throws Exception {
+//        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
+//
+//        MockHttpServletRequestBuilder builder =
+//                MockMvcRequestBuilders.put("/stats/multi?id="+1L+"&speed="+25.0+"&victory="+true)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON);
+//
+//        mockMvc.perform(builder)
+//                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 
-        MockHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.put("/stats/multi?id="+1L+"&speed="+25.0+"&victory="+true)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON);
-
-        mockMvc.perform(builder)
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    void updateStatsMultiplayerUnsuccessful() throws Exception {
-        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
-
-        MockHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.put("/stats/multiplayer?id="+1L+"&speed="+25.0+"&victory="+true)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON);
-
-        mockMvc.perform(builder)
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
-                .andDo(MockMvcResultHandlers.print());
-    }
+//    @Test
+//    void updateStatsMultiplayerUnsuccessful() throws Exception {
+//        when(statsServiceImpl.updateStatsMultiplayer(1L, 25.0, true)).thenReturn(mockStats);
+//
+//        MockHttpServletRequestBuilder builder =
+//                MockMvcRequestBuilders.put("/stats/multiplayer?id="+1L+"&speed="+25.0+"&victory="+true)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON);
+//
+//        mockMvc.perform(builder)
+//                .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+//                .andDo(MockMvcResultHandlers.print());
+//    }
 
     @Test
     void updateStatsSinglePlayerSuccessful() throws Exception {

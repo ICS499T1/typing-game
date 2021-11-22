@@ -3,16 +3,22 @@ package com.teamone.typinggame.services.game;
 import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.*;
 import com.teamone.typinggame.repositories.UserRepository;
+import com.teamone.typinggame.services.user.KeyStatsServiceImpl;
+import com.teamone.typinggame.services.user.StatsServiceImpl;
+import com.teamone.typinggame.services.user.UserServiceImpl;
 import com.teamone.typinggame.storage.ActiveUserStorage;
 import com.teamone.typinggame.storage.GameStorage;
 import com.teamone.typinggame.storage.PlayerStorage;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.teamone.typinggame.models.GameStatus.*;
 
@@ -22,6 +28,9 @@ public class GameServiceImpl implements GameService {
     private final GameStorage gameStorage = GameStorage.getInstance();
     private final ActiveUserStorage activeUserStorage = ActiveUserStorage.getInstance();
     private final PlayerStorage playerStorage = PlayerStorage.getInstance();
+    private final UserServiceImpl userService;
+    private final StatsServiceImpl statsService;
+    private final KeyStatsServiceImpl keyStatsService;
     private final UserRepository userRepository;
     private final Object lockObject = new Object();
 
@@ -42,6 +51,7 @@ public class GameServiceImpl implements GameService {
         Player player = new Player(user, game.getGameId());
         player.setPlayerNumber(1);
         game.addPlayer(sessionId, player);
+        playerStorage.addPlayer(sessionId, player);
 
         synchronized (lockObject) {
             if (gameStorage.contains(gameId)) {
@@ -115,27 +125,31 @@ public class GameServiceImpl implements GameService {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         Game game = gameStorage.getGame(gameId);
-
         if (game.getStatus() != COMPLETED) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
-
-        //TODO Add logic for processing user stats
-
-
         game.reset();
         return game;
     }
 
-    public synchronized void removePlayer(Player player) throws GameNotFoundException {
+    public synchronized void removePlayer(String sessionId) throws GameNotFoundException {
+        Player player = playerStorage.getPlayer(sessionId);
+        System.out.println(PlayerStorage.getPlayers().size());
+        PlayerStorage.getPlayers().forEach((session, pl) -> System.out.println("Session: "+ session + " Player: " + pl));
         String gameId = player.getGameId();
+
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         Game game = gameStorage.getGame(gameId);
-
-        //TODO Add logic for processing user stats
-        // TODO Add logic for processing players that haven't finished the text or finished partially
+        // Reassign player numbers in case the host has left
+        if (player.getPlayerNumber() == 1 && game.getPlayerCount() > 1) {
+            AtomicInteger playerNum = new AtomicInteger(0);
+            Map<String, Player> playerMap = game.getPlayers();
+            playerMap.forEach((sessionIdObj, playerObj) -> playerObj.setPlayerNumber(playerNum.incrementAndGet()));
+        }
+        player.setEndTime(System.currentTimeMillis());
+        processUserStats(player, game);
 
         game.removePlayer(player);
         activeUserStorage.removeUser(player.getUsername());
@@ -148,7 +162,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    public Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException {
+    public Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UserNotFoundException {
         Game game = gameStorage.getGame(gameId);
         if (game == null) {
             throw new GameNotFoundException("Game " + gameId + " not found.");
@@ -194,6 +208,7 @@ public class GameServiceImpl implements GameService {
             } else if (game.getDoneCount() < game.getPlayerCount()) {
                 game.incrementDoneCount();
             }
+            processUserStats(player, game);
         }
 
         if (game.getDoneCount().equals(game.getPlayerCount())) {
@@ -217,5 +232,11 @@ public class GameServiceImpl implements GameService {
         }
         game.setStatus(COUNTDOWN);
         return game;
+    }
+
+    private void processUserStats(Player player, Game game) {
+        User user = activeUserStorage.getUser(player.getUsername());
+        User updatedUser = player.calculateStats(user, game.getGameText(), game.getStartTime());
+        userService.updateUserInfo(updatedUser);
     }
 }

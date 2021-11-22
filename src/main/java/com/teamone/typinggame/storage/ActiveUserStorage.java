@@ -1,6 +1,5 @@
 package com.teamone.typinggame.storage;
 
-import com.teamone.typinggame.models.Player;
 import com.teamone.typinggame.models.User;
 
 import java.util.HashMap;
@@ -27,6 +26,15 @@ public class ActiveUserStorage {
             instance = new ActiveUserStorage();
         }
         return instance;
+    }
+
+    public User getUser(String username) {
+        activeUserLock.writeLock().lock();
+        try {
+            return activeUsers.get(username);
+        } finally {
+            activeUserLock.writeLock().unlock();
+        }
     }
 
     public void addUser(User user) {

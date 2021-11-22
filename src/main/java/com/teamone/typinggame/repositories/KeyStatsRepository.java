@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface KeyStatsRepository extends JpaRepository<KeyStats, Long> {
     public List<KeyStats> findByUser(User user);
+    //public List<KeyStats> updateByUser(User user);
 }

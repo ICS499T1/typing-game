@@ -34,7 +34,7 @@ public class User implements UserDetails {
     @PrimaryKeyJoinColumn
     private Stats userStats;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, targetEntity=KeyStats.class)
     private List<KeyStats> allKeys;
 
 //    private Boolean locked = false;

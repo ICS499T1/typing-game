@@ -75,22 +75,54 @@ public class Player {
         endTime = 0L;
     }
 
-    public void calculateStats(Long startTime, List<Character> gameText, User user) {
-        Long totalTime = endTime - startTime;
-        Integer textLength = gameText.size();
-        Integer lastWord = textLength % 5 > 0 ? 1 : 0;
-        Integer words = (position/5) + lastWord;
-        Double currentRaceSpeed = ((double) words / (totalTime/60000));
-
+    public User calculateStats(User user, List<Character> gameText, Long startTime) {
+        List<Character> completedText = gameText.subList(0, position);
+        Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
+        System.out.println("Current speed: " + currentRaceSpeed);
+        System.out.println("This player: " + this);
         List<KeyStats> oldKeyStatsList = user.getAllKeys();
         Map<Character, KeyStats> keyStatsMap = new HashMap<>();
 
-        for (KeyStats keyStats : oldKeyStatsList) {
-            keyStatsMap.put(keyStats.getCharacter(), keyStats);
-        }
+        oldKeyStatsList.forEach(keyStats -> keyStatsMap.put(keyStats.getCharacter(), keyStats));
 
         Map<Character, Integer> gameTextCounts = new HashMap<>();
         Map<Character, Integer> failedCharactersCounts = new HashMap<>();
+        countGameLetters(gameTextCounts, completedText);
+        countFailedChars(failedCharactersCounts);
+
+        gameTextCounts.forEach((character, count) -> {
+            if (keyStatsMap.containsKey(character)) {
+                KeyStats keyStats = keyStatsMap.get(character);
+                keyStats.addNumSuccesses(Integer.toUnsignedLong(count));
+                Integer numFailsThisMatch = failedCharactersCounts.get(character);
+                if (numFailsThisMatch != null) keyStats.addNumFails(Integer.toUnsignedLong(numFailsThisMatch));
+            } else {
+                KeyStats keyStats = new KeyStats(character);
+                keyStats.setNumSuccesses(Integer.toUnsignedLong(count));
+                keyStats.setNumFails(Integer.toUnsignedLong(count));
+                keyStats.setUser(user);
+                keyStatsMap.put(character, keyStats);
+            }
+        });
+
+        List<KeyStats> newKeyStatsList = new ArrayList<>();
+        keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
+
+        setUserStatsMultiplayer(user, currentRaceSpeed, newKeyStatsList);
+
+        return user;
+    }
+
+    private Double calculateCurrentRaceSpeed(List<Character> gameText, Long startTime) {
+        Double totalTime = (double) (endTime - startTime) / 60000;
+        Integer textLength = gameText.size();
+        Integer lastWord = textLength % 5 > 0 ? 1 : 0;
+        Integer words = (position / 5) + lastWord;
+        Double currentRaceSpeed = (double) Math.round((words / totalTime) * 100d) / 100d;
+        return currentRaceSpeed;
+    }
+
+    private void countGameLetters(Map<Character, Integer> gameTextCounts, List<Character> gameText) {
         for (Character character : gameText) {
             if (gameTextCounts.containsKey(character)) {
                 gameTextCounts.put(character, gameTextCounts.get(character) + 1);
@@ -98,7 +130,9 @@ public class Player {
                 gameTextCounts.put(character, 1);
             }
         }
+    }
 
+    private void countFailedChars(Map<Character, Integer> failedCharactersCounts) {
         for (Character character : failedCharacters) {
             if (failedCharactersCounts.containsKey(character)) {
                 failedCharactersCounts.put(character, failedCharactersCounts.get(character) + 1);
@@ -106,27 +140,9 @@ public class Player {
                 failedCharactersCounts.put(character, 1);
             }
         }
+    }
 
-        gameTextCounts.forEach((character, count) -> {
-            if (keyStatsMap.containsKey(character)) {
-                KeyStats keyStats = keyStatsMap.get(character);
-                keyStats.addNumSuccesses(Integer.toUnsignedLong(count));
-                Integer numFailsThisMatch = failedCharactersCounts.get(character);
-                keyStats.addNumFails(Integer.toUnsignedLong(numFailsThisMatch));
-            } else {
-                KeyStats keyStats = new KeyStats(character);
-                keyStats.setNumSuccesses(Integer.toUnsignedLong(count));
-                keyStats.setNumFails(Integer.toUnsignedLong(count));
-                keyStatsMap.put(character, keyStats);
-            }
-        });
-
-        List<KeyStats> newKeyStatsList = new ArrayList<>();
-
-        keyStatsMap.forEach(((character, keyStats) -> {
-            newKeyStatsList.add(keyStats);
-        }));
-
+    private void setUserStatsMultiplayer(User user, Double currentRaceSpeed, List<KeyStats> newKeyStatsList) {
         Stats userStats = user.getUserStats();
         userStats.setLastRaceSpeed(currentRaceSpeed);
         if (winner) {
@@ -139,8 +155,23 @@ public class Player {
         userStats.incrementNumMultiGamesCompleted();
         Double numerator = (userStats.getAverageSpeed() * (userStats.getNumMultiGamesCompleted() + userStats.getNumSingleGamesCompleted() - 1) + currentRaceSpeed);
         Integer denominator = userStats.getNumSingleGamesCompleted() + userStats.getNumMultiGamesCompleted();
-
-        userStats.setAverageSpeed(numerator/denominator);
+        Double newAverageSpeed = (double) Math.round((numerator/denominator) * 100d) / 100d;
+        userStats.setAverageSpeed(newAverageSpeed);
+        user.setUserStats(userStats);
         user.setAllKeys(newKeyStatsList);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "username='" + username + '\'' +
+                ", position=" + position +
+                ", failedCharacters=" + failedCharacters +
+                ", incorrectCharacters=" + incorrectCharacters +
+                ", gameId='" + gameId + '\'' +
+                ", winner=" + winner +
+                ", endTime=" + endTime +
+                ", playerNumber=" + playerNumber +
+                '}';
     }
 }

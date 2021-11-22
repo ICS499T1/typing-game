@@ -10,4 +10,5 @@ import java.util.List;
 public interface UserService {
     User newUser(User user) throws UserAlreadyExistsException;
     UserDetails authorizeUser(User user) throws UserNotFoundException;
+    User updateUserInfo(User user);
 }

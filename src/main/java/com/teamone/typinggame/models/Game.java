@@ -1,9 +1,7 @@
 package com.teamone.typinggame.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.teamone.typinggame.configuration.GameConfig;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -179,7 +177,7 @@ public class Game {
         try {
             //TODO remove this user and pass in a real user
             User user = new User();
-            players.forEach((sessionId, player) -> player.calculateStats(startTime, gameText, user));
+            players.forEach((sessionId, player) -> player.calculateStats(user, gameText, startTime));
         } finally {
             playerSetLock.readLock().unlock();
         }

@@ -2,7 +2,6 @@ package com.teamone.typinggame.services.user;
 
 import com.teamone.typinggame.exceptions.IncorrectPasswordException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
-import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
@@ -15,8 +14,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -65,5 +62,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException(username + " not found.");
         }
         return user;
+    }
+
+    public User updateUserInfo(User user) {
+        User pulledUser = userRepository.findByUsername(user.getUsername());
+        pulledUser.setAllKeys(user.getAllKeys());
+        pulledUser.setUserStats(user.getUserStats());
+        return userRepository.saveAndFlush(pulledUser);
     }
 }
