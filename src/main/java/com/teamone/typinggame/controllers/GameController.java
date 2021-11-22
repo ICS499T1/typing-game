@@ -4,8 +4,10 @@ import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.Game;
 import com.teamone.typinggame.models.GameStatus;
 import com.teamone.typinggame.models.User;
+import com.teamone.typinggame.repositories.KeyStatsRepository;
 import com.teamone.typinggame.services.game.GameServiceImpl;
 import com.teamone.typinggame.services.game.PlayerServiceImpl;
+import com.teamone.typinggame.services.user.KeyStatsServiceImpl;
 import lombok.Data;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,11 +22,11 @@ public class GameController {
     private final GameServiceImpl gameService;
     private final PlayerServiceImpl playerService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final KeyStatsRepository keyStatsRepository;
 
 //    @PreAuthorize("#user.username == authentication.name")
     @GetMapping("/get-game-id")
     public String getGameId() {
-        System.out.println("get game id security context: " + SecurityContextHolder.getContext().getAuthentication());
         return gameService.generateGameId();
     }
 

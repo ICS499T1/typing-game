@@ -44,11 +44,11 @@ public class KeyStats {
         this.numSuccesses = numSuccesses;
         this.user = user;
     }
-    
+
     public void addNumSuccesses(Long numSuccesses) { this.numSuccesses += numSuccesses; }
-    
+
     public void addNumFails(Long numFails) { this.numFails += numFails; }
-    
+
     public Character getCharacter() {
         return character;
     }
@@ -79,5 +79,14 @@ public class KeyStats {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "KeyStats{" +
+                "character=" + character +
+                ", numFails=" + numFails +
+                ", numSuccesses=" + numSuccesses +
+                '}';
     }
 }

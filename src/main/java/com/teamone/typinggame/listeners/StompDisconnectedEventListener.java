@@ -25,7 +25,5 @@ public class StompDisconnectedEventListener implements ApplicationListener<Sessi
             System.out.println("Simp session id: " + sessionId);
             gameService.removePlayer(sessionId);
         }
-
-
     }
 }

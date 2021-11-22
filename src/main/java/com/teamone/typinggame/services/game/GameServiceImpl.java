@@ -142,17 +142,21 @@ public class GameServiceImpl implements GameService {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         Game game = gameStorage.getGame(gameId);
+
+        if (game.getStatus() == IN_PROGRESS) {
+            player.setEndTime(System.currentTimeMillis());
+            processUserStats(player, game);
+        }
+
+        game.removePlayer(player);
+        activeUserStorage.removeUser(player.getUsername());
+
         // Reassign player numbers in case the host has left
         if (player.getPlayerNumber() == 1 && game.getPlayerCount() > 1) {
             AtomicInteger playerNum = new AtomicInteger(0);
             Map<String, Player> playerMap = game.getPlayers();
             playerMap.forEach((sessionIdObj, playerObj) -> playerObj.setPlayerNumber(playerNum.incrementAndGet()));
         }
-        player.setEndTime(System.currentTimeMillis());
-        processUserStats(player, game);
-
-        game.removePlayer(player);
-        activeUserStorage.removeUser(player.getUsername());
 
         if (game.getPlayerCount() < 1) {
             gameStorage.removeGame(game);
@@ -160,6 +164,7 @@ public class GameServiceImpl implements GameService {
             game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             gameStorage.addGame(game);
         }
+        // TODO return the modified game on the /status channel so all other players can update the player being removed and new host being set
     }
 
     public Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UserNotFoundException {
