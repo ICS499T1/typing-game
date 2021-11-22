@@ -31,6 +31,7 @@ public class Player {
     public Player(User user, String gameId) {
         this.username = user.getUsername();
         this.winner = false;
+        this.endTime = 0L;
         this.gameId = gameId;
         this.position = 0;
         this.incorrectCharacters = new Stack<>();
@@ -78,7 +79,7 @@ public class Player {
         Long totalTime = endTime - startTime;
         Integer textLength = gameText.size();
         Integer lastWord = textLength % 5 > 0 ? 1 : 0;
-        Integer words = (textLength/5) + lastWord;
+        Integer words = (position/5) + lastWord;
         Double currentRaceSpeed = ((double) words / (totalTime/60000));
 
         List<KeyStats> oldKeyStatsList = user.getAllKeys();

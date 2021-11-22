@@ -18,7 +18,6 @@ import static com.teamone.typinggame.models.GameStatus.*;
 
 @RequiredArgsConstructor
 @Component
-@JsonIgnoreProperties({"gameText"})
 public class Game {
     private final ReadWriteLock gameRwLock = new ReentrantReadWriteLock();
     private final ReadWriteLock playerSetLock = new ReentrantReadWriteLock();
@@ -135,9 +134,11 @@ public class Game {
 
     public void fillGameText() {
         gameText = new ArrayList<>();
-        String url = "http://metaphorpsum.com/paragraphs/1/10";
+        //TODO change back to 10 sentences at end of url
+        String url = "http://metaphorpsum.com/paragraphs/1/1";
         RestTemplate restTemplate = new RestTemplate();
         String paragraph = restTemplate.getForObject(url, String.class);
+
 
         char[] characterArray = paragraph.toCharArray();
         for(char c : characterArray) {

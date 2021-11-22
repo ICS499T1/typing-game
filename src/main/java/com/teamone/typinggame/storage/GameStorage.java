@@ -63,4 +63,15 @@ public class GameStorage {
             gameStorageLock.writeLock().unlock();
         }
     }
+
+    public void printGames() {
+        gameStorageLock.readLock().lock();
+        try {
+            games.forEach((gameId, game) -> {
+                System.out.println("GAME: " + gameId);
+            });
+        } finally {
+            gameStorageLock.readLock().unlock();
+        }
+    }
 }

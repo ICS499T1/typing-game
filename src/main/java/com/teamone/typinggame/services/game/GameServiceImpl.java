@@ -7,6 +7,7 @@ import com.teamone.typinggame.storage.ActiveUserStorage;
 import com.teamone.typinggame.storage.GameStorage;
 import com.teamone.typinggame.storage.PlayerStorage;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class GameServiceImpl implements GameService {
 
         Game game = new Game(gameId);
         Player player = new Player(user, game.getGameId());
+        player.setPlayerNumber(1);
         game.addPlayer(sessionId, player);
 
         synchronized (lockObject) {
@@ -58,37 +60,33 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException {
+    public synchronized Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
+        if (activeUserStorage.contains(user)) {
+            throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
+        }
+        Game game = gameStorage.getGame(gameId);
+        if (game.getPlayerCount() > 3) {
+            throw new InvalidGameStateException("Game " + gameId + " is already full.");
+        }
+        if (game.getStatus() == IN_PROGRESS || game.getStatus() == COUNTDOWN) {
+            throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
+        }
+
         String username = user.getUsername();
         if ((user = userRepository.findByUsername(username)) == null) {
             throw new UserNotFoundException("User " + username + " does not exist.");
         }
 
-        Game game = gameStorage.getGame(gameId);
+
         Player player = new Player(user, gameId);
-
-
-        synchronized (lockObject) {
-            if (activeUserStorage.contains(user)) {
-                throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
-            }
-
-            if (game.getPlayerCount() > 3) {
-                throw new InvalidGameStateException("Game " + gameId + " is already full.");
-            }
-            if (game.getStatus() == IN_PROGRESS) {
-                throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
-            }
-
-            activeUserStorage.addUser(user);
-            playerStorage.addPlayer(sessionId, player);
-            game.addPlayer(sessionId, player);
-            game.setStatus(READY);
-        }
-
+        player.setPlayerNumber(game.getPlayerCount() + 1);
+        activeUserStorage.addUser(user);
+        playerStorage.addPlayer(sessionId, player);
+        game.addPlayer(sessionId, player);
+        game.setStatus(READY);
         return game;
     }
 
@@ -98,11 +96,15 @@ public class GameServiceImpl implements GameService {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         Game game = gameStorage.getGame(gameId);
+        System.out.println("Trying to start game: " + game.getStatus());
 
-        if (game.getStatus() != READY) {
-            throw new InvalidGameStateException("Game " + gameId + " is not ready.");
+        if (game.getStatus() != COUNTDOWN) {
+            System.out.println("Trying to start game (inside if): " + game.getStatus());
+            throw new InvalidGameStateException("Game " + gameId + " is not counting down.");
         }
+
         game.setStatus(IN_PROGRESS);
+        System.out.println("After setting new status: " + game.getStatus());
         game.setStartTime(System.currentTimeMillis());
         return game;
     }
@@ -114,23 +116,14 @@ public class GameServiceImpl implements GameService {
         }
         Game game = gameStorage.getGame(gameId);
 
-        if (game.getStatus() != IN_PROGRESS) {
+        if (game.getStatus() != COMPLETED) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
-
-        Map<String, Player> players = game.getPlayers();
-
-
-
-        Integer playerCount = game.getPlayerCount();
 
         //TODO Add logic for processing user stats
 
 
         game.reset();
-
-        //TODO reset game here
-        gameStorage.addGame(game);
         return game;
     }
 
@@ -160,10 +153,20 @@ public class GameServiceImpl implements GameService {
         if (game == null) {
             throw new GameNotFoundException("Game " + gameId + " not found.");
         }
+
+        if (game.getStatus() != IN_PROGRESS) {
+            throw new InvalidGameStateException("Game " + gameId + " is not in progress.");
+        }
+
         Player player = game.getPlayer(sessionId);
         if (player == null) {
             throw new PlayerNotFoundException("Player " + sessionId + " not found.");
         }
+
+        if (player.getEndTime() != 0) {
+            throw new InvalidGameStateException("Player " + player.getUsername() + " is already done.");
+        }
+
         Integer position = player.getPosition();
 
         List<Character> gameText = game.getGameText();
@@ -194,20 +197,25 @@ public class GameServiceImpl implements GameService {
         }
 
         if (game.getDoneCount().equals(game.getPlayerCount())) {
-            return gameEnd(game.getGameId());
+            game.setStatus(COMPLETED);
         }
         return game;
     }
 
-
-    public void startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException {
+    public synchronized Game startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         Game game = gameStorage.getGame(gameId);
+
+        if (game.getStatus() == IN_PROGRESS || game.getStatus() == WAITING_FOR_ANOTHER_PLAYER) {
+            throw new InvalidGameStateException("Game " + gameId + " cannot be started.");
+        }
         Player player = game.getPlayer(sessionId);
         if (game.getPlayer(sessionId).getPlayerNumber() != 1) {
             throw new InvalidGameStateException("Player " + player.getUsername() + " is not allowed to start timer.");
         }
+        game.setStatus(COUNTDOWN);
+        return game;
     }
 }
