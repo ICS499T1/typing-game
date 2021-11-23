@@ -150,7 +150,7 @@ public class GameServiceImpl implements GameService {
 
         game.removePlayer(player);
         activeUserStorage.removeUser(player.getUsername());
-
+        // TODO: reassign numbers after the round is done
         // Reassign player numbers in case the host has left
         if (player.getPlayerNumber() == 1 && game.getPlayerCount() > 1) {
             AtomicInteger playerNum = new AtomicInteger(0);

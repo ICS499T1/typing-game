@@ -68,6 +68,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User pulledUser = userRepository.findByUsername(user.getUsername());
         pulledUser.setAllKeys(user.getAllKeys());
         pulledUser.setUserStats(user.getUserStats());
+        //user.getAllKeys().forEach(key -> System.out.println(key));
         return userRepository.saveAndFlush(pulledUser);
     }
 }
