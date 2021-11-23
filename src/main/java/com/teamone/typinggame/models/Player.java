@@ -90,7 +90,13 @@ public class Player {
         gameTextCounts.forEach((c, count) -> System.out.println("Char: " + c + " Count: " + count));
         // Fixed key stats loading logic
         gameTextCounts.forEach((character, count) -> {
-            KeyStats keyStats = new KeyStats(character);
+            KeyStats keyStats = keyStatsMap.get(character);
+
+            if (keyStats == null) {
+                keyStats = new KeyStats();
+                keyStats.setCharacter(character);
+            }
+
             Integer numFailsThisMatch = failedCharactersCounts.get(character);
             if (numFailsThisMatch != null) {
                 keyStats.setNumFails(numFailsThisMatch.longValue());
