@@ -5,6 +5,7 @@ import com.teamone.typinggame.models.GameStatus;
 import com.teamone.typinggame.models.Player;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -13,8 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.teamone.typinggame.models.GameStatus.READY;
-import static com.teamone.typinggame.models.GameStatus.WAITING_FOR_ANOTHER_PLAYER;
+import static com.teamone.typinggame.models.GameStatus.*;
 
 @RequiredArgsConstructor
 @Component
@@ -34,7 +34,7 @@ public class Game extends GameInterface {
     private GameConfig gameConfig = new GameConfig();
 
     public Game(String gameId) {
-        fillGameText();
+        initialText();
         setGameId(gameId);
         this.players = new HashMap<>();
         this.playerCount = 0;
@@ -45,8 +45,7 @@ public class Game extends GameInterface {
     public void reassignPlayers() {
         if (getPlayerCount() >= 1) {
             AtomicInteger playerNum = new AtomicInteger(0);
-            Map<String, Player> playerMap = getPlayers();
-            playerMap.forEach((sessionIdObj, playerObj) -> playerObj.setPlayerNumber(playerNum.incrementAndGet()));
+            players.forEach((sessionIdObj, playerObj) -> playerObj.setPlayerNumber(playerNum.incrementAndGet()));
         }
     }
 
@@ -74,6 +73,10 @@ public class Game extends GameInterface {
     public void setWinner(Player player) {
         doneLock.writeLock().lock();
         try {
+            if (player == null) {
+                winner = null;
+                return;
+            }
             winner = player;
             player.setWinner(true);
             incrementDoneCount();
@@ -96,17 +99,17 @@ public class Game extends GameInterface {
         }
     }
 
-    public boolean removePlayer(Player player) {
-        playerSetLock.readLock().lock();
+    public boolean removePlayer(String sessionId) {
+        playerSetLock.writeLock().lock();
         try {
-            Player removedPlayer = players.remove(player.getGameId());
+            Player removedPlayer = players.remove(sessionId);
             if (removedPlayer != null) {
                 playerCount--;
                 return true;
             }
             return false;
         } finally {
-            playerSetLock.readLock().unlock();
+            playerSetLock.writeLock().unlock();
         }
     }
 
@@ -128,7 +131,7 @@ public class Game extends GameInterface {
         }
     }
 
-    private void resetPlayers() {
+    public void resetPlayers() {
         playerSetLock.writeLock().lock();
         try {
             players.forEach((sessionId, player) -> player.reset());
@@ -141,8 +144,7 @@ public class Game extends GameInterface {
         doneLock.writeLock().lock();
         gameRwLock.writeLock().lock();
         try {
-            GameStatus status = playerCount > 1 ? READY : WAITING_FOR_ANOTHER_PLAYER;
-            setStatus(status);
+            setStatus(COUNTDOWN);
             fillGameText();
             winner = null;
             resetPlayers();
@@ -152,5 +154,14 @@ public class Game extends GameInterface {
             gameRwLock.writeLock().unlock();
             doneLock.writeLock().unlock();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "players=" + players +
+                ", winner=" + winner +
+                ", playerCount=" + playerCount +
+                '}';
     }
 }

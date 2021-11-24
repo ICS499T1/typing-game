@@ -11,5 +11,5 @@ public interface GameService {
     GameInterface gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
     GameInterface gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
     GameInterface gameEnd(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
-    void removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException;
+    GameInterface removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException;
 }

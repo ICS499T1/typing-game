@@ -77,6 +77,15 @@ public abstract class GameInterface {
         }
     }
 
+    public void decrementDoneCount() {
+        doneLock.writeLock().lock();
+        try {
+            doneCount--;
+        } finally {
+            doneLock.writeLock().unlock();
+        }
+    }
+
     public void fillGameText() {
         gameText = new ArrayList<>();
         //TODO change back to 10 sentences at end of url
@@ -86,6 +95,14 @@ public abstract class GameInterface {
 
 
         char[] characterArray = paragraph.toCharArray();
+        for (char c : characterArray) {
+            gameText.add(c);
+        }
+    }
+    public void initialText() {
+        gameText = new ArrayList<>();
+        String initialText = "Welcome to Space Racer! Invite your friends using the link above!!";
+        char[] characterArray = initialText.toCharArray();
         for (char c : characterArray) {
             gameText.add(c);
         }

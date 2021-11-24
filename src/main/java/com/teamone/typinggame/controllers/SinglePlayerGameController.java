@@ -46,7 +46,7 @@ public class SinglePlayerGameController {
     public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
         SingleplayerGame game = singleGameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/single/gameplay/" + game.getGameId(), game);
-        if (game.getStatus() == GameStatus.COMPLETED) {
+        if (game.getStatus() == GameStatus.READY) {
             simpMessagingTemplate.convertAndSend("/game/single/status/" + gameId, game);
         }
         if (game.getPlayer().getEndTime() != 0) {

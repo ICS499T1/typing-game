@@ -74,14 +74,14 @@ public class SingleGameServiceImpl extends AbstractGameService {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
         SingleplayerGame game = (SingleplayerGame) gameStorage.getGame(gameId);
-        if (game.getStatus() != COMPLETED) {
+        if (game.getStatus() != READY) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
         game.reset();
         return game;
     }
 
-    public synchronized void removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
+    public synchronized SingleplayerGame removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
         Player player = playerStorage.getPlayer(sessionId);
         if (player == null) {
             throw new PlayerNotFoundException("Player with session id {" + sessionId + "} could not be found.");
@@ -102,6 +102,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
         gameStorage.removeGame(game);
         playerStorage.removePlayer(sessionId);
         activeUserStorage.removeUser(player.getUsername());
+        return null;
     }
 
     @Override
@@ -148,7 +149,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
             player.setEndTime(System.currentTimeMillis());
             game.incrementDoneCount();
             processUserStats(player, game);
-            game.setStatus(COMPLETED);
+            game.setStatus(READY);
         }
         return game;
     }

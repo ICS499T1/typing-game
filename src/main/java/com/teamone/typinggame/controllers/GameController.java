@@ -69,7 +69,7 @@ public class GameController {
     public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
         Game game = gameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/gameplay/" + game.getGameId(), game);
-        if (game.getStatus() == GameStatus.COMPLETED) {
+        if (game.getStatus() == GameStatus.READY || game.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
             simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
         }
         if (game.getPlayer(sessionId).getEndTime() != 0) {
@@ -83,6 +83,12 @@ public class GameController {
 //        simpMessagingTemplate.convertAndSend("/game/join/" + game.getGameId(), game);
 //        simpMessagingTemplate.convertAndSend("/game/gameText/" + gameId, game.getGameText());
         simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+    }
+
+    public void removePlayer(String sessionId) throws PlayerNotFoundException, UnsupportedGameTypeException, GameNotFoundException {
+        Game game = gameService.removePlayer(sessionId);
+        System.out.println("REMOVED PLAYER " + game);
+        simpMessagingTemplate.convertAndSend("/game/status/" + game.getGameId(), game);
     }
 
     @MessageExceptionHandler

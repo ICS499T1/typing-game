@@ -40,7 +40,6 @@ public class GameServiceImpl extends AbstractGameService {
             throw new ActiveUserException("User " + username + " is already in a game.");
         }
 
-        // TODO find another solution for single player
         activeUserStorage.addUser(user);
         gameStorage.addGame(game);
         return game;
@@ -107,15 +106,14 @@ public class GameServiceImpl extends AbstractGameService {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
         Game game = (Game) gameStorage.getGame(gameId);
-        if (game.getStatus() != COMPLETED) {
+        if (game.getStatus() != READY) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
-        if (!game.containsHost()) game.reassignPlayers();
         game.reset();
         return game;
     }
 
-    public synchronized void removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
+    public synchronized Game removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
         Player player = playerStorage.getPlayer(sessionId);
         if (player == null)
             throw new PlayerNotFoundException("Player with session id {" + sessionId + "} could not be found.");
@@ -133,7 +131,13 @@ public class GameServiceImpl extends AbstractGameService {
             processUserStats(player, game);
         }
 
-        game.removePlayer(player);
+        if (player.getPosition() >= game.getGameText().size() && game.getDoneCount() > 0) {
+            System.out.println("DECREMENTING");
+            game.decrementDoneCount();
+        }
+
+        game.removePlayer(sessionId);
+        playerStorage.removePlayer(sessionId);
         activeUserStorage.removeUser(player.getUsername());
 
         if (game.getPlayerCount() < 1) {
@@ -143,10 +147,22 @@ public class GameServiceImpl extends AbstractGameService {
             //gameStorage.addGame(game);
         }
         // TODO: test if the logic for reassigning players works
-        if (player.getPlayerNumber() == 1 && (game.getStatus() == WAITING_FOR_ANOTHER_PLAYER || game.getStatus() == READY)) {
+        if (player.getPlayerNumber() == 1) {
             game.reassignPlayers();
         }
+
+        if (game.getStatus() == COUNTDOWN || game.getDoneCount() == game.getPlayerCount()) {
+            if (game.getStatus() == COUNTDOWN) {
+                game.reset();
+            }
+            if (game.getPlayerCount() > 1) {
+                game.setStatus(READY);
+            } else {
+                game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
+            }
+        }
         // TODO return the modified game on the /status channel so all other players can update the player being removed and new host being set
+        return game;
     }
 
     @Override
@@ -203,7 +219,11 @@ public class GameServiceImpl extends AbstractGameService {
         }
 
         if (game.getDoneCount().equals(game.getPlayerCount())) {
-            game.setStatus(COMPLETED);
+            if (game.getPlayerCount() > 1) {
+                game.setStatus(READY);
+            } else {
+                game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
+            }
         }
         return game;
     }
