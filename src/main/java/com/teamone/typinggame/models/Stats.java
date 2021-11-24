@@ -24,6 +24,7 @@ public class Stats {
     private int racesWon;
     private double lastRaceSpeed;
     private double bestRaceSpeed;
+    private double accuracy;
 
     public void incrementRacesWon() {
         racesWon++;
@@ -103,6 +104,14 @@ public class Stats {
 
     public void setBestRaceSpeed(double bestRaceSpeed) {
         this.bestRaceSpeed = bestRaceSpeed;
+    }
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
     }
 
     public Stats() {

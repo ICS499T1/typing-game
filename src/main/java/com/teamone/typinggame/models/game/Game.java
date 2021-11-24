@@ -1,45 +1,32 @@
-package com.teamone.typinggame.models;
+package com.teamone.typinggame.models.game;
 
 import com.teamone.typinggame.configuration.GameConfig;
-import lombok.*;
+import com.teamone.typinggame.models.GameStatus;
+import com.teamone.typinggame.models.Player;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.teamone.typinggame.models.GameStatus.*;
+import static com.teamone.typinggame.models.GameStatus.READY;
+import static com.teamone.typinggame.models.GameStatus.WAITING_FOR_ANOTHER_PLAYER;
 
 @RequiredArgsConstructor
 @Component
-public class Game {
+public class Game extends GameInterface {
     private final ReadWriteLock gameRwLock = new ReentrantReadWriteLock();
     private final ReadWriteLock playerSetLock = new ReentrantReadWriteLock();
     private final ReadWriteLock doneLock = new ReentrantReadWriteLock();
 
     @Getter
-    private String gameId;
-
-    private GameStatus status;
-
-    @Getter
-    @Setter
-    private List<Character> gameText;
-
-    @Getter
     private Map<String, Player> players;
 
-    @Getter
-    @Setter
-    private Long startTime;
-
     private Player winner;
-
-    private Integer doneCount;
 
     @Getter
     private Integer playerCount;
@@ -48,37 +35,30 @@ public class Game {
 
     public Game(String gameId) {
         fillGameText();
-        this.gameId = gameId;
+        setGameId(gameId);
         this.players = new HashMap<>();
         this.playerCount = 0;
-        this.status = WAITING_FOR_ANOTHER_PLAYER;
-        this.doneCount = 0;
+        setStatus(WAITING_FOR_ANOTHER_PLAYER);
+        setDoneCount(0);
     }
 
-    public GameStatus getStatus() {
-        gameRwLock.readLock().lock();
-        try {
-            return status;
-        } finally {
-            gameRwLock.readLock().unlock();
+    public void reassignPlayers() {
+        if (getPlayerCount() >= 1) {
+            AtomicInteger playerNum = new AtomicInteger(0);
+            Map<String, Player> playerMap = getPlayers();
+            playerMap.forEach((sessionIdObj, playerObj) -> playerObj.setPlayerNumber(playerNum.incrementAndGet()));
         }
     }
 
-    public void setStatus(GameStatus status) {
-        gameRwLock.writeLock().lock();
+    public boolean containsHost() {
+        playerSetLock.writeLock().lock();
         try {
-            this.status = status;
+            for (Player player : players.values()) {
+                if (player.getPlayerNumber() == 1) return true;
+            }
+            return false;
         } finally {
-            gameRwLock.writeLock().unlock();
-        }
-    }
-
-    public Integer getDoneCount() {
-        doneLock.readLock().lock();
-        try {
-            return doneCount;
-        } finally {
-            doneLock.readLock().unlock();
+            playerSetLock.writeLock().unlock();
         }
     }
 
@@ -96,7 +76,7 @@ public class Game {
         try {
             winner = player;
             player.setWinner(true);
-            doneCount++;
+            incrementDoneCount();
         } finally {
             doneLock.writeLock().unlock();
         }
@@ -130,21 +110,6 @@ public class Game {
         }
     }
 
-    public void fillGameText() {
-        gameText = new ArrayList<>();
-        //TODO change back to 10 sentences at end of url
-        String url = "http://metaphorpsum.com/paragraphs/1/1";
-        RestTemplate restTemplate = new RestTemplate();
-        String paragraph = restTemplate.getForObject(url, String.class);
-
-
-        char[] characterArray = paragraph.toCharArray();
-        for(char c : characterArray) {
-            gameText.add(c);
-        }
-
-    }
-
     public Player getPlayer(String sessionId) {
         playerSetLock.readLock().lock();
         try {
@@ -172,38 +137,19 @@ public class Game {
         }
     }
 
-    private void calculateStats() {
-        playerSetLock.readLock().lock();
-        try {
-            //TODO remove this user and pass in a real user
-            User user = new User();
-            players.forEach((sessionId, player) -> player.calculateStats(user, gameText, startTime));
-        } finally {
-            playerSetLock.readLock().unlock();
-        }
-    }
-
     public void reset() {
         doneLock.writeLock().lock();
         gameRwLock.writeLock().lock();
         try {
-            status = playerCount > 1 ? READY : WAITING_FOR_ANOTHER_PLAYER;
+            GameStatus status = playerCount > 1 ? READY : WAITING_FOR_ANOTHER_PLAYER;
+            setStatus(status);
             fillGameText();
             winner = null;
             resetPlayers();
-            doneCount = 0;
-            startTime = 0L;
+            setDoneCount(0);
+            setStartTime(0L);
         } finally {
             gameRwLock.writeLock().unlock();
-            doneLock.writeLock().unlock();
-        }
-    }
-
-    public void incrementDoneCount() {
-        doneLock.writeLock().lock();
-        try {
-            doneCount++;
-        } finally {
             doneLock.writeLock().unlock();
         }
     }

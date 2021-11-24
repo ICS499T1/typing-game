@@ -1,6 +1,5 @@
 package com.teamone.typinggame.models;
 
-import com.teamone.typinggame.services.user.UserService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -75,7 +74,7 @@ public class Player {
         endTime = 0L;
     }
 
-    public User calculateStats(User user, List<Character> gameText, Long startTime) {
+    public User calculateSinglePlayerStats(User user, List<Character> gameText, Long startTime) {
         List<Character> completedText = gameText.subList(0, position);
         Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
         List<KeyStats> oldKeyStatsList = user.getAllKeys();
@@ -87,7 +86,6 @@ public class Player {
         Map<Character, Integer> failedCharactersCounts = new HashMap<>();
         countGameLetters(gameTextCounts, completedText);
         countFailedChars(failedCharactersCounts);
-        gameTextCounts.forEach((c, count) -> System.out.println("Char: " + c + " Count: " + count));
         // Fixed key stats loading logic
         gameTextCounts.forEach((character, count) -> {
             KeyStats keyStats = keyStatsMap.get(character);
@@ -96,7 +94,6 @@ public class Player {
                 keyStats = new KeyStats();
                 keyStats.setCharacter(character);
             }
-
             Integer numFailsThisMatch = failedCharactersCounts.get(character);
             if (numFailsThisMatch != null) {
                 keyStats.setNumFails(numFailsThisMatch.longValue());
@@ -109,6 +106,46 @@ public class Player {
             keyStatsMap.put(character, keyStats);
         });
 
+        List<KeyStats> newKeyStatsList = new ArrayList<>();
+        keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
+
+        setUserStatsSinglePlayer(user, currentRaceSpeed, newKeyStatsList);
+
+        return user;
+    }
+
+    public User calculateMultiplayerStats(User user, List<Character> gameText, Long startTime) {
+        List<Character> completedText = gameText.subList(0, position);
+        Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
+        List<KeyStats> oldKeyStatsList = user.getAllKeys();
+        Map<Character, KeyStats> keyStatsMap = new HashMap<>();
+
+        oldKeyStatsList.forEach(keyStats -> keyStatsMap.put(keyStats.getCharacter(), keyStats));
+
+        Map<Character, Integer> gameTextCounts = new HashMap<>();
+        Map<Character, Integer> failedCharactersCounts = new HashMap<>();
+        countGameLetters(gameTextCounts, completedText);
+        countFailedChars(failedCharactersCounts);
+        gameTextCounts.forEach((c, count) -> System.out.println("Char: " + c + " Count: " + count));
+        gameTextCounts.forEach((character, count) -> {
+            KeyStats keyStats = keyStatsMap.get(character);
+
+            if (keyStats == null) {
+                keyStats = new KeyStats();
+                keyStats.setCharacter(character);
+            }
+            Integer numFailsThisMatch = failedCharactersCounts.get(character);
+            if (numFailsThisMatch != null) {
+                keyStats.setNumFails(numFailsThisMatch.longValue());
+                keyStats.setNumSuccesses(count.longValue() - numFailsThisMatch);
+            } else {
+                keyStats.setNumSuccesses(count.longValue());
+                keyStats.setNumFails(0L);
+            }
+            keyStats.setUser(user);
+            keyStatsMap.put(character, keyStats);
+        });
+        // put new key stats directly to the list instead of using a map?
         List<KeyStats> newKeyStatsList = new ArrayList<>();
         keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
 
@@ -126,6 +163,24 @@ public class Player {
         return currentRaceSpeed;
     }
 
+    private Double calculateNewAverageSpeed(Stats userStats, Double currentRaceSpeed) {
+        Double numerator = (userStats.getAverageSpeed() * (userStats.getNumMultiGamesCompleted() + userStats.getNumSingleGamesCompleted() - 1) + currentRaceSpeed);
+        Integer denominator = userStats.getNumSingleGamesCompleted() + userStats.getNumMultiGamesCompleted();
+        Double newAverageSpeed = (double) Math.round((numerator/denominator) * 100d) / 100d;
+        return newAverageSpeed;
+    }
+
+    private Double calculateSuccessRate(List<KeyStats> keyStatsList) {
+        double totalCount = 0;
+        double successes = 0;
+        for (KeyStats keyStats : keyStatsList) {
+            totalCount += keyStats.getNumSuccesses() + keyStats.getNumFails();
+            successes += keyStats.getNumSuccesses();
+        }
+        Double successRate = Math.round((successes/totalCount) * 10000d) / 100d;
+        return successRate;
+    }
+
     private void countGameLetters(Map<Character, Integer> gameTextCounts, List<Character> gameText) {
         for (Character character : gameText) {
             if (gameTextCounts.containsKey(character)) {
@@ -137,7 +192,6 @@ public class Player {
     }
 
     private void countFailedChars(Map<Character, Integer> failedCharactersCounts) {
-        if (failedCharacters.isEmpty()) return;
         for (Character character : failedCharacters) {
             if (failedCharactersCounts.containsKey(character)) {
                 failedCharactersCounts.put(character, failedCharactersCounts.get(character) + 1);
@@ -145,7 +199,6 @@ public class Player {
                 failedCharactersCounts.put(character, 1);
             }
         }
-        System.out.println("Failed char counts size: " + failedCharactersCounts.size());
     }
 
     private void setUserStatsMultiplayer(User user, Double currentRaceSpeed, List<KeyStats> newKeyStatsList) {
@@ -157,12 +210,24 @@ public class Player {
         if (currentRaceSpeed > userStats.getBestRaceSpeed()) {
             userStats.setBestRaceSpeed(currentRaceSpeed);
         }
-        // TODO add logic for incrementing single games
         userStats.incrementNumMultiGamesCompleted();
-        Double numerator = (userStats.getAverageSpeed() * (userStats.getNumMultiGamesCompleted() + userStats.getNumSingleGamesCompleted() - 1) + currentRaceSpeed);
-        Integer denominator = userStats.getNumSingleGamesCompleted() + userStats.getNumMultiGamesCompleted();
-        Double newAverageSpeed = (double) Math.round((numerator/denominator) * 100d) / 100d;
+        Double newAverageSpeed = calculateNewAverageSpeed(userStats, currentRaceSpeed);
         userStats.setAverageSpeed(newAverageSpeed);
+        userStats.setAccuracy(calculateSuccessRate(newKeyStatsList));
+        user.setUserStats(userStats);
+        user.setAllKeys(newKeyStatsList);
+    }
+
+    private void setUserStatsSinglePlayer(User user, Double currentRaceSpeed, List<KeyStats> newKeyStatsList) {
+        Stats userStats = user.getUserStats();
+        userStats.setLastRaceSpeed(currentRaceSpeed);
+        if (currentRaceSpeed > userStats.getBestRaceSpeed()) {
+            userStats.setBestRaceSpeed(currentRaceSpeed);
+        }
+        userStats.incrementNumSingleGamesCompleted();
+        Double newAverageSpeed = calculateNewAverageSpeed(userStats, currentRaceSpeed);
+        userStats.setAverageSpeed(newAverageSpeed);
+        userStats.setAccuracy(calculateSuccessRate(newKeyStatsList));
         user.setUserStats(userStats);
         user.setAllKeys(newKeyStatsList);
     }
