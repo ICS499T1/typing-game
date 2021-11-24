@@ -37,13 +37,14 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test:5.5.1'
 }
 
-test {
-	useJUnitPlatform()
+bootJar {
+	archiveClassifier.set('boot')
 }
 
 jar {
-	manifest {
-		attributes 'Main-Class': 'com.teamone.typinggame.TypingGameApplication'
-	}
+	archiveClassifier.set('')
 }
 
+test {
+	useJUnitPlatform()
+}
