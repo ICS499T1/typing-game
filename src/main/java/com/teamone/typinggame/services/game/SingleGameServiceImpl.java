@@ -66,7 +66,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized SingleplayerGame gameEnd(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized SingleplayerGame startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }

@@ -40,11 +40,11 @@ public class GameController {
     }
 
     // TODO add check for making sure timer can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
-    @MessageMapping("/timer/{gameId}/{session}")
-    public void startTimer(@DestinationVariable(value = "gameId") String gameId, @Header("simpSessionId") String sessionId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
-        Game game = gameService.startTimer(gameId, sessionId);
-        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
-    }
+//    @MessageMapping("/timer/{gameId}/{session}")
+//    public void startTimer(@DestinationVariable(value = "gameId") String gameId, @Header("simpSessionId") String sessionId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
+//        Game game = gameService.startTimer(gameId, sessionId);
+//        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+//    }
 
     // TODO add check for making sure game can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
     @MessageMapping("/start/{gameId}/{session}")
@@ -77,9 +77,9 @@ public class GameController {
         }
     }
 
-    @MessageMapping("/end/{gameId}/{session}")
-    public void endGame(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
-        Game game = gameService.gameEnd(gameId);
+    @MessageMapping("/timer/{gameId}/{session}")
+    public void startTimer(@DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
+        Game game = gameService.startTimer(gameId);
 //        simpMessagingTemplate.convertAndSend("/game/join/" + game.getGameId(), game);
 //        simpMessagingTemplate.convertAndSend("/game/gameText/" + gameId, game.getGameText());
         simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
@@ -87,13 +87,12 @@ public class GameController {
 
     public void removePlayer(String sessionId) throws PlayerNotFoundException, UnsupportedGameTypeException, GameNotFoundException {
         Game game = gameService.removePlayer(sessionId);
-        System.out.println("REMOVED PLAYER " + game);
         simpMessagingTemplate.convertAndSend("/game/status/" + game.getGameId(), game);
     }
 
     @MessageExceptionHandler
     @SendTo("/game/errors/{gameId}/{session}")
     public String handleException(Throwable exception, @DestinationVariable(value = "session") String session, @DestinationVariable(value = "gameId") String gameId) {
-        return "server exception: " + exception.getMessage();
+        return exception.getMessage();
     }
 }

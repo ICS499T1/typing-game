@@ -10,6 +10,6 @@ public interface GameService {
     GameInterface createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException;
     GameInterface gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
     GameInterface gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
-    GameInterface gameEnd(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
+    GameInterface startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException;
     GameInterface removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException;
 }

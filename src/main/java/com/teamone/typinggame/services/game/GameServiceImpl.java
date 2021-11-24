@@ -98,7 +98,7 @@ public class GameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized Game gameEnd(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized Game startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
@@ -228,25 +228,25 @@ public class GameServiceImpl extends AbstractGameService {
         return game;
     }
 
-    public synchronized Game startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
-        if (!gameStorage.contains(gameId)) {
-            throw new GameNotFoundException("Game " + gameId + " does not exist.");
-        }
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
-            throw new UnsupportedGameTypeException("{" + gameId + "}");
-        }
-        Game game = (Game) gameStorage.getGame(gameId);
-
-        if (game.getStatus() == IN_PROGRESS || game.getStatus() == WAITING_FOR_ANOTHER_PLAYER) {
-            throw new InvalidGameStateException("Game " + gameId + " cannot be started.");
-        }
-        Player player = game.getPlayer(sessionId);
-        if (game.getPlayer(sessionId).getPlayerNumber() != 1) {
-            throw new InvalidGameStateException("Player " + player.getUsername() + " is not allowed to start timer.");
-        }
-        game.setStatus(COUNTDOWN);
-        return game;
-    }
+//    public synchronized Game startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+//        if (!gameStorage.contains(gameId)) {
+//            throw new GameNotFoundException("Game " + gameId + " does not exist.");
+//        }
+//        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+//            throw new UnsupportedGameTypeException("{" + gameId + "}");
+//        }
+//        Game game = (Game) gameStorage.getGame(gameId);
+//
+//        if (game.getStatus() == IN_PROGRESS || game.getStatus() == WAITING_FOR_ANOTHER_PLAYER) {
+//            throw new InvalidGameStateException("Game " + gameId + " cannot be started.");
+//        }
+//        Player player = game.getPlayer(sessionId);
+//        if (game.getPlayer(sessionId).getPlayerNumber() != 1) {
+//            throw new InvalidGameStateException("Player " + player.getUsername() + " is not allowed to start timer.");
+//        }
+//        game.setStatus(COUNTDOWN);
+//        return game;
+//    }
 
     private void processUserStats(Player player, Game game) {
         User user = activeUserStorage.getUser(player.getUsername());

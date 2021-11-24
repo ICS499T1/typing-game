@@ -3,17 +3,14 @@ package com.teamone.typinggame.controllers;
 import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.GameStatus;
 import com.teamone.typinggame.models.User;
-import com.teamone.typinggame.models.game.Game;
 import com.teamone.typinggame.models.game.SingleplayerGame;
 import com.teamone.typinggame.repositories.KeyStatsRepository;
-import com.teamone.typinggame.services.game.GameServiceImpl;
 import com.teamone.typinggame.services.game.PlayerServiceImpl;
 import com.teamone.typinggame.services.game.SingleGameServiceImpl;
 import lombok.Data;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Data
@@ -56,13 +53,13 @@ public class SinglePlayerGameController {
 
     @MessageMapping("/end/single/{gameId}/{session}")
     public void endGame(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
-        SingleplayerGame game = singleGameService.gameEnd(gameId);
+        SingleplayerGame game = singleGameService.startTimer(gameId);
         simpMessagingTemplate.convertAndSend("/game/single/status/" + gameId, game);
     }
 
     @MessageExceptionHandler
     @SendTo("/game/single/errors/{gameId}/{session}")
     public String handleException(Throwable exception, @DestinationVariable(value = "session") String session, @DestinationVariable(value = "gameId") String gameId) {
-        return "Server exception: " + exception.getMessage();
+        return exception.getMessage();
     }
 }
