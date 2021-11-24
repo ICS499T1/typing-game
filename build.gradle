@@ -43,7 +43,7 @@ test {
 
 jar {
 	manifest {
-		attributes 'Main-Class': 'src.main.java.com.teamone.typinggame.TypingGameApplication'
+		attributes 'Main-Class': 'com.teamone.typinggame.TypingGameApplication'
 	}
 }
 
