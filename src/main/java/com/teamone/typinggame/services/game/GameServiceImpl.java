@@ -27,19 +27,21 @@ public class GameServiceImpl extends AbstractGameService {
             throw new UserNotFoundException("User " + username + " does not exist.");
         }
 
-        Game game = new Game(gameId);
-        Player player = new Player(user, gameId);
-        player.setPlayerNumber(1);
-        game.addPlayer(sessionId, player);
-        playerStorage.addPlayer(sessionId, player);
-        if (gameStorage.contains(gameId)) {
-            throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
-        }
-
         if (activeUserStorage.contains(user)) {
             throw new ActiveUserException("User " + username + " is already in a game.");
         }
 
+        Game game = new Game(gameId);
+        Player player = new Player(user, gameId);
+        player.setPlayerNumber(1);
+        game.addPlayer(sessionId, player);
+
+        if (gameStorage.contains(gameId)) {
+            throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
+        }
+
+
+        playerStorage.addPlayer(sessionId, player);
         activeUserStorage.addUser(user);
         gameStorage.addGame(game);
         return game;
