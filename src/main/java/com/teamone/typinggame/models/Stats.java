@@ -8,10 +8,10 @@ import javax.persistence.*;
 @Component
 @Entity
 @Table(name = "stats")
-@JsonIgnoreProperties(value={"user"})
+@JsonIgnoreProperties(value = {"user"})
 public class Stats {
     @Id
-    @Column(name="userID")
+    @Column(name = "userID")
     private Long userID;
 
     @OneToOne(optional = false)
@@ -26,14 +26,23 @@ public class Stats {
     private double bestRaceSpeed;
     private double accuracy;
 
+    /**
+     * Increments victories if the user won.
+     */
     public void incrementRacesWon() {
         racesWon++;
     }
 
+    /**
+     * Increments number of single player games completed.
+     */
     public void incrementNumSingleGamesCompleted() {
         numSingleGamesCompleted++;
     }
 
+    /**
+     * Increments number of multi player games completed.
+     */
     public void incrementNumMultiGamesCompleted() {
         numMultiGamesCompleted++;
     }
@@ -70,18 +79,6 @@ public class Stats {
         this.numMultiGamesCompleted = numMultiGamesCompleted;
     }
 
-    public void updateNumSingleGamesCompleted() {
-        this.numSingleGamesCompleted++;
-    }
-
-    public void updateNumMultiGamesCompleted() {
-        this.numMultiGamesCompleted++;
-    }
-
-    public void updateRacesWon() {
-        this.racesWon++;
-    }
-
     public int getRacesWon() {
         return racesWon;
     }
@@ -114,9 +111,23 @@ public class Stats {
         this.accuracy = accuracy;
     }
 
+    /**
+     * Basic constructor to initialize stats.
+     */
     public Stats() {
     }
 
+    /**
+     * Basic constructor to initialize stats.
+     *
+     * @param user                    - user associated with stats
+     * @param averageSpeed            - average speed
+     * @param numSingleGamesCompleted - number of single player games completed
+     * @param numMultiGamesCompleted  - number of multiplayer games completed
+     * @param racesWon                - number of races won
+     * @param lastRaceSpeed           - last race speed
+     * @param bestRaceSpeed           - bes race speed
+     */
     public Stats(User user, double averageSpeed, int numSingleGamesCompleted, int numMultiGamesCompleted, int racesWon, int lastRaceSpeed, int bestRaceSpeed) {
         this.user = user;
         this.averageSpeed = averageSpeed;

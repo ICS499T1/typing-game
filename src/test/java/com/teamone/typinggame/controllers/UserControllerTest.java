@@ -73,8 +73,6 @@ class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
-//        JSONArray jsonArray = new JSONArray(mvcResult.getResponse().getContentAsString());
-//        assertEquals(mockUser.getUsername(), jsonObject.get("username"));
     }
 
     @Test

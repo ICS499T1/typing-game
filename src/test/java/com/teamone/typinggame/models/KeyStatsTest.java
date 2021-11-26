@@ -22,12 +22,6 @@ class KeyStatsTest {
         System.out.println("-----Terminating user tests-----");
     }
 
-    //How we test this--?
-//    @Test
-//    void getKeyID() {
-//        assertEquals(mockKeyStats.getKeyID(),(""));
-//    }
-
     @Test
     void getCharacter() {
         assertEquals(mockKeyStats.getCharacter(),('a'));

@@ -27,6 +27,12 @@ public class Player {
 
     private Integer playerNumber;
 
+    /**
+     * Basic constructor to initialize a player.
+     *
+     * @param user   - user about to play
+     * @param gameId - game id
+     */
     public Player(User user, String gameId) {
         this.username = user.getUsername();
         this.winner = false;
@@ -50,22 +56,41 @@ public class Player {
         return username.hashCode();
     }
 
+    /**
+     * Increments position of the player.
+     */
     public void incrementPosition() {
         position++;
     }
 
+    /**
+     * Adds characters player made mistakes in to the list.
+     *
+     * @param character - failed character
+     */
     public void addFailedCharacter(Character character) {
         failedCharacters.add(character);
     }
 
+    /**
+     * Adds incorrect characters to the stack.
+     *
+     * @param character - incorrect character
+     */
     public void addIncorrectCharacter(Character character) {
         incorrectCharacters.add(character);
     }
 
+    /**
+     * Removes latest incorrect character from the stack.
+     */
     public void removeIncorrectCharacter() {
         incorrectCharacters.pop();
     }
 
+    /**
+     * Reset all values for the player.
+     */
     public void reset() {
         position = 0;
         failedCharacters = new ArrayList<>();
@@ -74,6 +99,14 @@ public class Player {
         endTime = 0L;
     }
 
+    /**
+     * Calculates stats for a player for a single player game.
+     *
+     * @param user      - user associated with the player
+     * @param gameText  - text provided by the game
+     * @param startTime - the time the user started playing
+     * @return User with updated stats and keyStats
+     */
     public User calculateSinglePlayerStats(User user, List<Character> gameText, Long startTime) {
         List<Character> completedText = gameText.subList(0, position);
         Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
@@ -82,32 +115,12 @@ public class Player {
 
         oldKeyStatsList.forEach(keyStats -> keyStatsMap.put(keyStats.getCharacter(), keyStats));
 
-        // This structure holds character frequency in game text
         Map<Character, Integer> gameTextCounts = new HashMap<>();
-
-        // This structure holds character frequency of failed characters
         Map<Character, Integer> failedCharactersCounts = new HashMap<>();
 
         countGameLetters(gameTextCounts, completedText);
         countFailedChars(failedCharactersCounts);
-        // Fixed key stats loading logic
-        gameTextCounts.forEach((character, count) -> {
-            KeyStats keyStats = keyStatsMap.get(character);
-            System.out.println(keyStats);
-
-            if (keyStats == null) {
-                keyStats = new KeyStats(character);
-            }
-            Integer numFailsThisMatch = failedCharactersCounts.get(character);
-            if (numFailsThisMatch != null) {
-                keyStats.setNumFails(numFailsThisMatch.longValue() + keyStats.getNumFails());
-                keyStats.setNumSuccesses((count.longValue()) + keyStats.getNumSuccesses());
-            } else {
-                keyStats.setNumSuccesses(count.longValue() + keyStats.getNumSuccesses());
-            }
-            keyStats.setUser(user);
-            keyStatsMap.put(character, keyStats);
-        });
+        updateUserKeyStats(gameTextCounts, keyStatsMap, failedCharactersCounts, user);
 
         List<KeyStats> newKeyStatsList = new ArrayList<>();
         keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
@@ -117,6 +130,14 @@ public class Player {
         return user;
     }
 
+    /**
+     * Calculates stats for a player for a multiplayer game.
+     *
+     * @param user      - user associated with the player
+     * @param gameText  - text provided by the game
+     * @param startTime - the time the user started playing
+     * @return User with updated stats and keyStats
+     */
     public User calculateMultiplayerStats(User user, List<Character> gameText, Long startTime) {
         List<Character> completedText = gameText.subList(0, position);
         Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
@@ -129,7 +150,24 @@ public class Player {
         Map<Character, Integer> failedCharactersCounts = new HashMap<>();
         countGameLetters(gameTextCounts, completedText);
         countFailedChars(failedCharactersCounts);
-        gameTextCounts.forEach((c, count) -> System.out.println("Char: " + c + " Count: " + count));
+        updateUserKeyStats(gameTextCounts, keyStatsMap, failedCharactersCounts, user);
+        List<KeyStats> newKeyStatsList = new ArrayList<>();
+        keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
+
+        setUserStatsMultiplayer(user, currentRaceSpeed, newKeyStatsList);
+
+        return user;
+    }
+
+    /**
+     * Helper method that updates key stats values for each character after the game is completed or the player has left the game.
+     *
+     * @param gameTextCounts         - counts of each character the user has typed
+     * @param keyStatsMap            - old key stats
+     * @param failedCharactersCounts - failed character counts
+     * @param user                   - user associated with the stats
+     */
+    private void updateUserKeyStats(Map<Character, Integer> gameTextCounts, Map<Character, KeyStats> keyStatsMap, Map<Character, Integer> failedCharactersCounts, User user) {
         gameTextCounts.forEach((character, count) -> {
             KeyStats keyStats = keyStatsMap.get(character);
 
@@ -146,15 +184,15 @@ public class Player {
             keyStats.setUser(user);
             keyStatsMap.put(character, keyStats);
         });
-        // put new key stats directly to the list instead of using a map?
-        List<KeyStats> newKeyStatsList = new ArrayList<>();
-        keyStatsMap.forEach((character, keyStats) -> newKeyStatsList.add(keyStats));
-
-        setUserStatsMultiplayer(user, currentRaceSpeed, newKeyStatsList);
-
-        return user;
     }
 
+    /**
+     * Helper method to calculate player's last speed.
+     *
+     * @param gameText  - characters the user has typed
+     * @param startTime - starting time
+     * @return Double - speed from the last game
+     */
     private Double calculateCurrentRaceSpeed(List<Character> gameText, Long startTime) {
         Double totalTime = (double) (endTime - startTime) / 60000;
         Integer textLength = gameText.size();
@@ -164,13 +202,26 @@ public class Player {
         return currentRaceSpeed;
     }
 
+    /**
+     * Helper method to calculate new average speed based on the latest result.
+     *
+     * @param userStats        - stats to be updated
+     * @param currentRaceSpeed - latest speed
+     * @return Double - new average speed
+     */
     private Double calculateNewAverageSpeed(Stats userStats, Double currentRaceSpeed) {
         Double numerator = (userStats.getAverageSpeed() * (userStats.getNumMultiGamesCompleted() + userStats.getNumSingleGamesCompleted() - 1) + currentRaceSpeed);
         Integer denominator = userStats.getNumSingleGamesCompleted() + userStats.getNumMultiGamesCompleted();
-        Double newAverageSpeed = (double) Math.round((numerator/denominator) * 100d) / 100d;
+        Double newAverageSpeed = (double) Math.round((numerator / denominator) * 100d) / 100d;
         return newAverageSpeed;
     }
 
+    /**
+     * Calculate total number of successes to get the overall accuracy.
+     *
+     * @param keyStatsList - updated key stats
+     * @return Double - overall accuracy for the user
+     */
     private Double calculateSuccessRate(List<KeyStats> keyStatsList) {
         double totalCount = 0;
         double successes = 0;
@@ -178,10 +229,16 @@ public class Player {
             totalCount += keyStats.getNumSuccesses() + keyStats.getNumFails();
             successes += keyStats.getNumSuccesses();
         }
-        Double successRate = Math.round((successes/totalCount) * 10000d) / 100d;
+        Double successRate = Math.round((successes / totalCount) * 10000d) / 100d;
         return successRate;
     }
 
+    /**
+     * Helper method to calculate the frequency of each letter in the game text.
+     *
+     * @param gameTextCounts - a map to store the results in
+     * @param gameText       - text that player has typed.
+     */
     private void countGameLetters(Map<Character, Integer> gameTextCounts, List<Character> gameText) {
         for (Character character : gameText) {
             if (gameTextCounts.containsKey(character)) {
@@ -192,6 +249,11 @@ public class Player {
         }
     }
 
+    /**
+     * Helper method to calculate the frequency of failed characters.
+     *
+     * @param failedCharactersCounts - a map to store the frequency.
+     */
     private void countFailedChars(Map<Character, Integer> failedCharactersCounts) {
         for (Character character : failedCharacters) {
             if (failedCharactersCounts.containsKey(character)) {
@@ -202,6 +264,13 @@ public class Player {
         }
     }
 
+    /**
+     * Sets the updated user stats for a multiplayer game.
+     *
+     * @param user             - user associated with the results
+     * @param currentRaceSpeed - last speed
+     * @param newKeyStatsList  - updated key stats
+     */
     private void setUserStatsMultiplayer(User user, Double currentRaceSpeed, List<KeyStats> newKeyStatsList) {
         Stats userStats = user.getUserStats();
         userStats.setLastRaceSpeed(currentRaceSpeed);
@@ -219,6 +288,13 @@ public class Player {
         user.setAllKeys(newKeyStatsList);
     }
 
+    /**
+     * Sets the updated user stats for a single player game.
+     *
+     * @param user             - user associated with the results
+     * @param currentRaceSpeed - last speed
+     * @param newKeyStatsList  - updated key stats
+     */
     private void setUserStatsSinglePlayer(User user, Double currentRaceSpeed, List<KeyStats> newKeyStatsList) {
         Stats userStats = user.getUserStats();
         userStats.setLastRaceSpeed(currentRaceSpeed);

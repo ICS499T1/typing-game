@@ -3,7 +3,7 @@ package com.teamone.typinggame.services.game;
 import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.Player;
 import com.teamone.typinggame.models.User;
-import com.teamone.typinggame.models.game.SingleplayerGame;
+import com.teamone.typinggame.models.game.SingleGame;
 import com.teamone.typinggame.repositories.UserRepository;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized SingleplayerGame createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
+    public synchronized SingleGame createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
         String username = user.getUsername();
         if ((user = userRepository.findByUsername(username)) == null) {
             throw new UserNotFoundException("User " + username + " does not exist.");
@@ -32,7 +32,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
 
         Player player = new Player(user, gameId);
         player.setPlayerNumber(1);
-        SingleplayerGame game = new SingleplayerGame(gameId, player);
+        SingleGame game = new SingleGame(gameId, player);
 
         if (gameStorage.contains(gameId)) {
             throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
@@ -45,15 +45,15 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized SingleplayerGame gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized SingleGame gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
 
-        if (!(gameStorage.getGame(gameId) instanceof SingleplayerGame)) {
+        if (!(gameStorage.getGame(gameId) instanceof SingleGame)) {
             throw new UnsupportedGameTypeException("Cannot start a single-player game {" + gameId + "} when it's a multi-player");
         }
-        SingleplayerGame game = (SingleplayerGame) gameStorage.getGame(gameId);
+        SingleGame game = (SingleGame) gameStorage.getGame(gameId);
 
         if (game.getStatus() == IN_PROGRESS) {
             throw new InvalidGameStateException("Game " + gameId + " is in progress.");
@@ -65,14 +65,14 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized SingleplayerGame startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized SingleGame startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof SingleplayerGame)) {
+        if (!(gameStorage.getGame(gameId) instanceof SingleGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        SingleplayerGame game = (SingleplayerGame) gameStorage.getGame(gameId);
+        SingleGame game = (SingleGame) gameStorage.getGame(gameId);
         if (game.getStatus() != READY) {
             throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
         }
@@ -80,7 +80,8 @@ public class SingleGameServiceImpl extends AbstractGameService {
         return game;
     }
 
-    public synchronized SingleplayerGame removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
+    @Override
+    public synchronized SingleGame removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
         Player player = playerStorage.getPlayer(sessionId);
         if (player == null) {
             throw new PlayerNotFoundException("Player with session id {" + sessionId + "} could not be found.");
@@ -90,10 +91,10 @@ public class SingleGameServiceImpl extends AbstractGameService {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof SingleplayerGame)) {
+        if (!(gameStorage.getGame(gameId) instanceof SingleGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        SingleplayerGame game = (SingleplayerGame) gameStorage.getGame(gameId);
+        SingleGame game = (SingleGame) gameStorage.getGame(gameId);
         if (game.getStatus() == IN_PROGRESS) {
             player.setEndTime(System.currentTimeMillis());
             processUserStats(player, game);
@@ -105,11 +106,11 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public SingleplayerGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
-        if (!(gameStorage.getGame(gameId) instanceof SingleplayerGame)) {
+    public SingleGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+        if (!(gameStorage.getGame(gameId) instanceof SingleGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        SingleplayerGame game = (SingleplayerGame) gameStorage.getGame(gameId);
+        SingleGame game = (SingleGame) gameStorage.getGame(gameId);
         if (game == null) {
             throw new GameNotFoundException("Game " + gameId + " not found.");
         }
@@ -153,8 +154,13 @@ public class SingleGameServiceImpl extends AbstractGameService {
         return game;
     }
 
-    //TODO: replace with stats for single player game
-    private void processUserStats(Player player, SingleplayerGame game) {
+    /**
+     * Helper method to process user stats.
+     *
+     * @param player - player for stats processing
+     * @param game   - a game player participated in
+     */
+    private void processUserStats(Player player, SingleGame game) {
         User user = activeUserStorage.getUser(player.getUsername());
         User updatedUser = player.calculateSinglePlayerStats(user, game.getGameText(), game.getStartTime());
         userService.updateUserInfo(updatedUser);

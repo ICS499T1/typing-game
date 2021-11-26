@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
-import java.util.Map;
 
 @Component
 @Entity
 @Table(
         name = "key_stats",
         uniqueConstraints =
-            @UniqueConstraint(columnNames = {"userID", "character"}))
+        @UniqueConstraint(columnNames = {"userID", "character"}))
 @JsonIgnoreProperties({"user", "keyID"})
 public class KeyStats {
     @Column(nullable = false)
@@ -23,22 +22,38 @@ public class KeyStats {
     private Long numSuccesses;
 
     @ManyToOne
-    @JoinColumn(name="userID", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User user;
 
     public Long getKeyID() {
         return keyID;
     }
 
+    /**
+     * Basic constructor for key stats object.
+     */
     public KeyStats() {
     }
 
+    /**
+     * Basic constructor for key stats object that requires a character input.
+     *
+     * @param character - input character
+     */
     public KeyStats(Character character) {
         this.character = character;
         this.numFails = 0L;
         this.numSuccesses = 0L;
     }
 
+    /**
+     * Basic constructor for key stats object that requires several parameters.
+     *
+     * @param character    - input character
+     * @param numFails     - number of fails for a specific character
+     * @param numSuccesses - number of successes for a specific character
+     * @param user         - user who the key stats are associated with
+     */
     public KeyStats(char character, long numFails, long numSuccesses, User user) {
         this.character = character;
         this.numFails = numFails;
@@ -46,9 +61,23 @@ public class KeyStats {
         this.user = user;
     }
 
-    public void addNumSuccesses(Long numSuccesses) { this.numSuccesses += numSuccesses; }
+    /**
+     * Adds the number of successes to an already existing value.
+     *
+     * @param numSuccesses - additional successes
+     */
+    public void addNumSuccesses(Long numSuccesses) {
+        this.numSuccesses += numSuccesses;
+    }
 
-    public void addNumFails(Long numFails) { this.numFails += numFails; }
+    /**
+     * Adds the number of fails to an already existing value.
+     *
+     * @param numFails - additional fails
+     */
+    public void addNumFails(Long numFails) {
+        this.numFails += numFails;
+    }
 
     public Character getCharacter() {
         return character;

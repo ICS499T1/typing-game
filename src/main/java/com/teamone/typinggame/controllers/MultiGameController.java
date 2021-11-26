@@ -1,12 +1,10 @@
 package com.teamone.typinggame.controllers;
 
 import com.teamone.typinggame.exceptions.*;
-import com.teamone.typinggame.models.game.Game;
+import com.teamone.typinggame.models.game.MultiGame;
 import com.teamone.typinggame.models.GameStatus;
 import com.teamone.typinggame.models.User;
-import com.teamone.typinggame.repositories.KeyStatsRepository;
-import com.teamone.typinggame.services.game.GameServiceImpl;
-import com.teamone.typinggame.services.game.PlayerServiceImpl;
+import com.teamone.typinggame.services.game.MultiGameServiceImpl;
 import lombok.Data;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,11 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Data
-public class GameController {
-    private final GameServiceImpl gameService;
-    private final PlayerServiceImpl playerService;
+public class MultiGameController {
+    private final MultiGameServiceImpl gameService;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final KeyStatsRepository keyStatsRepository;
 
     /**
      * Returns a newly generated game id for a new game.
@@ -46,8 +42,8 @@ public class GameController {
     @MessageMapping("/create/{gameId}/{session}")
     public void createGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpSessionId") String sessionId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
         if (principal.getName().equals(user.getUsername())) {
-            Game game = gameService.createGame(gameId, sessionId, user);
-            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+            MultiGame multiGame = gameService.createGame(gameId, sessionId, user);
+            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
         }
     }
 
@@ -63,9 +59,9 @@ public class GameController {
     @MessageMapping("/start/{gameId}/{session}")
     public void startGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
         // TODO add check for making sure game can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
-        Game game = gameService.gameStart(gameId);
-        simpMessagingTemplate.convertAndSend("/game/gameplay/" + gameId, game);
-        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+        MultiGame multiGame = gameService.gameStart(gameId);
+        simpMessagingTemplate.convertAndSend("/game/gameplay/" + gameId, multiGame);
+        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
     }
 
     /**
@@ -84,8 +80,8 @@ public class GameController {
     @MessageMapping("/join/{gameId}/{session}")
     public void joinGame(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, User user) throws UserNotFoundException, InvalidGameStateException, GameNotFoundException, ActiveUserException, UnsupportedGameTypeException {
         if (principal.getName().equals(user.getUsername())) {
-            Game game = gameService.connectToGame(sessionId, gameId, user);
-            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+            MultiGame multiGame = gameService.connectToGame(sessionId, gameId, user);
+            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
         }
     }
 
@@ -103,12 +99,12 @@ public class GameController {
      */
     @MessageMapping("/gameplay/{gameId}/{session}")
     public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
-        Game game = gameService.gamePlay(sessionId, gameId, input);
-        simpMessagingTemplate.convertAndSend("/game/gameplay/" + game.getGameId(), game);
-        if (game.getStatus() == GameStatus.READY || game.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
-            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+        MultiGame multiGame = gameService.gamePlay(sessionId, gameId, input);
+        simpMessagingTemplate.convertAndSend("/game/gameplay/" + multiGame.getGameId(), multiGame);
+        if (multiGame.getStatus() == GameStatus.READY || multiGame.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
+            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
         }
-        if (game.getPlayer(sessionId).getEndTime() != 0) {
+        if (multiGame.getPlayer(sessionId).getEndTime() != 0) {
             simpMessagingTemplate.convertAndSend("/game/playerStatus/" + gameId + "/" + sessionId, 1);
         }
     }
@@ -124,8 +120,8 @@ public class GameController {
     @MessageMapping("/timer/{gameId}/{session}")
     public void startTimer(@DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
         // TODO add check for making sure timer can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
-        Game game = gameService.startTimer(gameId);
-        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, game);
+        MultiGame multiGame = gameService.startTimer(gameId);
+        simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
     }
 
     /**
@@ -137,8 +133,8 @@ public class GameController {
      * @throws GameNotFoundException        when the game does not exist
      */
     public void removePlayer(String sessionId) throws PlayerNotFoundException, UnsupportedGameTypeException, GameNotFoundException {
-        Game game = gameService.removePlayer(sessionId);
-        simpMessagingTemplate.convertAndSend("/game/status/" + game.getGameId(), game);
+        MultiGame multiGame = gameService.removePlayer(sessionId);
+        simpMessagingTemplate.convertAndSend("/game/status/" + multiGame.getGameId(), multiGame);
     }
 
     /**

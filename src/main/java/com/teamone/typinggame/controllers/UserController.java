@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,6 +30,13 @@ public class UserController {
         this.authToken = authToken;
     }
 
+    /**
+     * Creates a new user.
+     *
+     * @param signUpInfo - sign up object with username and password information
+     * @return User - newly created user
+     * @throws UserAlreadyExistsException when the username exists
+     */
     @PostMapping("/add")
     public User newUser(@RequestBody SignUp signUpInfo) throws UserAlreadyExistsException {
         User user = new User();
@@ -39,21 +45,27 @@ public class UserController {
         return userServiceImpl.newUser(user);
     }
 
+    /**
+     * Returns user information based on the username. Will work only if the user
+     * is authorized.
+     *
+     * @param username - username
+     * @return UserDetails - user info
+     */
     @PostAuthorize("returnObject.username == authentication.name")
     @PostMapping("/getuser")
     public UserDetails getUser(@RequestParam("username") String username) {
         return userServiceImpl.loadUserByUsername(username);
     }
 
+    /**
+     * Refreshes access token for the user.
+     * @param request - user request
+     * @param response - server response
+     * @throws IOException when an input or output error occurs
+     */
     @GetMapping("/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         authToken.refreshToken(request, response);
-    }
-
-    @PostMapping("/info")
-    public UserDetails userInfo(@RequestBody User user) {
-        UserDetails loadedUser = userServiceImpl.authorizeUser(user);
-        if (loadedUser != null) return loadedUser;
-        else throw new IllegalStateException("Incorrect credentials.");
     }
 }

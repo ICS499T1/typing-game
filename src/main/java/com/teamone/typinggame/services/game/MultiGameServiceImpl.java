@@ -3,7 +3,7 @@ package com.teamone.typinggame.services.game;
 import com.teamone.typinggame.exceptions.*;
 import com.teamone.typinggame.models.Player;
 import com.teamone.typinggame.models.User;
-import com.teamone.typinggame.models.game.Game;
+import com.teamone.typinggame.models.game.MultiGame;
 import com.teamone.typinggame.repositories.UserRepository;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import org.springframework.stereotype.Service;
@@ -13,14 +13,14 @@ import java.util.List;
 import static com.teamone.typinggame.models.GameStatus.*;
 
 @Service
-public class GameServiceImpl extends AbstractGameService {
+public class MultiGameServiceImpl extends AbstractGameService {
 
-    public GameServiceImpl(UserServiceImpl userService, UserRepository userRepository) {
+    public MultiGameServiceImpl(UserServiceImpl userService, UserRepository userRepository) {
         super(userService, userRepository);
     }
 
     @Override
-    public synchronized Game createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
+    public synchronized MultiGame createGame(String gameId, String sessionId, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
         String username = user.getUsername();
 
         if ((user = userRepository.findByUsername(username)) == null) {
@@ -31,10 +31,10 @@ public class GameServiceImpl extends AbstractGameService {
             throw new ActiveUserException("User " + username + " is already in a game.");
         }
 
-        Game game = new Game(gameId);
+        MultiGame multiGame = new MultiGame(gameId);
         Player player = new Player(user, gameId);
         player.setPlayerNumber(1);
-        game.addPlayer(sessionId, player);
+        multiGame.addPlayer(sessionId, player);
 
         if (gameStorage.contains(gameId)) {
             throw new GameAlreadyExistsException("Game " + gameId + " already exists.");
@@ -43,25 +43,38 @@ public class GameServiceImpl extends AbstractGameService {
 
         playerStorage.addPlayer(sessionId, player);
         activeUserStorage.addUser(user);
-        gameStorage.addGame(game);
-        return game;
+        gameStorage.addGame(multiGame);
+        return multiGame;
     }
 
-    public synchronized Game connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException, UnsupportedGameTypeException {
+    /**
+     * Connects other players to the game.
+     *
+     * @param sessionId - player's session id
+     * @param gameId    - game id
+     * @param user      - user associated with the player
+     * @return MultiGame - updated game
+     * @throws GameNotFoundException        when the game does not exist
+     * @throws UserNotFoundException        when the user does not exist
+     * @throws InvalidGameStateException    when the ga,e is already in progress or full
+     * @throws ActiveUserException          when the user is in another game
+     * @throws UnsupportedGameTypeException when the player tries to play the wrong type of game
+     */
+    public synchronized MultiGame connectToGame(String sessionId, String gameId, User user) throws GameNotFoundException, UserNotFoundException, InvalidGameStateException, ActiveUserException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
         if (activeUserStorage.contains(user)) {
             throw new ActiveUserException("User " + user.getUsername() + " is already in a game.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+        if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("Cannot join single-player game {" + gameId + "}");
         }
-        Game game = (Game) gameStorage.getGame(gameId);
-        if (game.getPlayerCount() > 3) {
+        MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
+        if (multiGame.getPlayerCount() > 3) {
             throw new InvalidGameStateException("Game " + gameId + " is already full.");
         }
-        if (game.getStatus() == IN_PROGRESS || game.getStatus() == COUNTDOWN) {
+        if (multiGame.getStatus() == IN_PROGRESS || multiGame.getStatus() == COUNTDOWN) {
             throw new InvalidGameStateException("Game " + gameId + " is in progress and cannot be joined.");
         }
 
@@ -72,50 +85,51 @@ public class GameServiceImpl extends AbstractGameService {
 
 
         Player player = new Player(user, gameId);
-        player.setPlayerNumber(game.getPlayerCount() + 1);
+        player.setPlayerNumber(multiGame.getPlayerCount() + 1);
         activeUserStorage.addUser(user);
         playerStorage.addPlayer(sessionId, player);
-        game.addPlayer(sessionId, player);
-        game.setStatus(READY);
-        return game;
+        multiGame.addPlayer(sessionId, player);
+        multiGame.setStatus(READY);
+        return multiGame;
     }
 
     @Override
-    public synchronized Game gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized MultiGame gameStart(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+        if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        Game game = (Game) gameStorage.getGame(gameId);
+        MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
 
-        if (game.getStatus() != COUNTDOWN) {
+        if (multiGame.getStatus() != COUNTDOWN) {
             throw new InvalidGameStateException("Game " + gameId + " is not counting down.");
         }
 
-        game.setStatus(IN_PROGRESS);
-        game.setStartTime(System.currentTimeMillis());
-        return game;
+        multiGame.setStatus(IN_PROGRESS);
+        multiGame.setStartTime(System.currentTimeMillis());
+        return multiGame;
     }
 
     @Override
-    public synchronized Game startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized MultiGame startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game {" + gameId + "} does not exist.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+        if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        Game game = (Game) gameStorage.getGame(gameId);
-        if (game.getStatus() != READY) {
+        MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
+        if (multiGame.getStatus() != READY) {
             throw new InvalidGameStateException("Timer for game {" + gameId + "} cannot be started.");
         }
-        game.reset();
-        return game;
+        multiGame.reset();
+        return multiGame;
     }
 
-    public synchronized Game removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
+    @Override
+    public synchronized MultiGame removePlayer(String sessionId) throws GameNotFoundException, PlayerNotFoundException, UnsupportedGameTypeException {
         Player player = playerStorage.getPlayer(sessionId);
         if (player == null)
             throw new PlayerNotFoundException("Player with session id {" + sessionId + "} could not be found.");
@@ -124,64 +138,64 @@ public class GameServiceImpl extends AbstractGameService {
         if (!gameStorage.contains(gameId)) {
             throw new GameNotFoundException("Game " + gameId + " does not exist.");
         }
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+        if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        Game game = (Game) gameStorage.getGame(gameId);
-        if (game.getStatus() == IN_PROGRESS) {
+        MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
+        if (multiGame.getStatus() == IN_PROGRESS) {
             player.setEndTime(System.currentTimeMillis());
-            processUserStats(player, game);
+            processUserStats(player, multiGame);
         }
 
-        if (player.getPosition() >= game.getGameText().size() && game.getDoneCount() > 0) {
+        if (player.getPosition() >= multiGame.getGameText().size() && multiGame.getDoneCount() > 0) {
             System.out.println("DECREMENTING");
-            game.decrementDoneCount();
+            multiGame.decrementDoneCount();
         }
 
-        game.removePlayer(sessionId);
+        multiGame.removePlayer(sessionId);
         playerStorage.removePlayer(sessionId);
         activeUserStorage.removeUser(player.getUsername());
 
-        if (game.getPlayerCount() < 1) {
-            gameStorage.removeGame(game);
-        } else if (game.getPlayerCount() == 1 && game.getStatus() == READY) {
-            game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
+        if (multiGame.getPlayerCount() < 1) {
+            gameStorage.removeGame(multiGame);
+        } else if (multiGame.getPlayerCount() == 1 && multiGame.getStatus() == READY) {
+            multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             //gameStorage.addGame(game);
         }
         // TODO: test if the logic for reassigning players works
         if (player.getPlayerNumber() == 1) {
-            game.reassignPlayers();
+            multiGame.reassignPlayers();
         }
 
-        if (game.getStatus() == COUNTDOWN || game.getDoneCount() == game.getPlayerCount()) {
-            if (game.getStatus() == COUNTDOWN) {
-                game.reset();
+        if (multiGame.getStatus() == COUNTDOWN || multiGame.getDoneCount() == multiGame.getPlayerCount()) {
+            if (multiGame.getStatus() == COUNTDOWN) {
+                multiGame.reset();
             }
-            if (game.getPlayerCount() > 1) {
-                game.setStatus(READY);
+            if (multiGame.getPlayerCount() > 1) {
+                multiGame.setStatus(READY);
             } else {
-                game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
+                multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             }
         }
         // TODO return the modified game on the /status channel so all other players can update the player being removed and new host being set
-        return game;
+        return multiGame;
     }
 
     @Override
-    public Game gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
-        if (!(gameStorage.getGame(gameId) instanceof Game)) {
+    public MultiGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+        if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
-        Game game = (Game) gameStorage.getGame(gameId);
-        if (game == null) {
+        MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
+        if (multiGame == null) {
             throw new GameNotFoundException("Game " + gameId + " not found.");
         }
 
-        if (game.getStatus() != IN_PROGRESS) {
+        if (multiGame.getStatus() != IN_PROGRESS) {
             throw new InvalidGameStateException("Game " + gameId + " is not in progress.");
         }
 
-        Player player = game.getPlayer(sessionId);
+        Player player = multiGame.getPlayer(sessionId);
         if (player == null) {
             throw new PlayerNotFoundException("Player " + sessionId + " not found.");
         }
@@ -192,7 +206,7 @@ public class GameServiceImpl extends AbstractGameService {
 
         Integer position = player.getPosition();
 
-        List<Character> gameText = game.getGameText();
+        List<Character> gameText = multiGame.getGameText();
 
         if (!player.getIncorrectCharacters().isEmpty()) {
             if (input == '\b') {
@@ -201,7 +215,7 @@ public class GameServiceImpl extends AbstractGameService {
                 player.addIncorrectCharacter(input);
             }
         } else if (input == '\b') {
-            return game;
+            return multiGame;
         } else if (gameText.get(position) == input) {
             player.incrementPosition();
         } else {
@@ -212,47 +226,33 @@ public class GameServiceImpl extends AbstractGameService {
         // Getting player position again for updated position
         if (gameText.size() == player.getPosition()) {
             player.setEndTime(System.currentTimeMillis());
-            if (game.getWinner() == null) {
-                game.setWinner(player);
-            } else if (game.getDoneCount() < game.getPlayerCount()) {
-                game.incrementDoneCount();
+            if (multiGame.getWinner() == null) {
+                multiGame.setWinner(player);
+            } else if (multiGame.getDoneCount() < multiGame.getPlayerCount()) {
+                multiGame.incrementDoneCount();
             }
-            processUserStats(player, game);
+            processUserStats(player, multiGame);
         }
 
-        if (game.getDoneCount().equals(game.getPlayerCount())) {
-            if (game.getPlayerCount() > 1) {
-                game.setStatus(READY);
+        if (multiGame.getDoneCount().equals(multiGame.getPlayerCount())) {
+            if (multiGame.getPlayerCount() > 1) {
+                multiGame.setStatus(READY);
             } else {
-                game.setStatus(WAITING_FOR_ANOTHER_PLAYER);
+                multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             }
         }
-        return game;
+        return multiGame;
     }
 
-//    public synchronized Game startTimer(String gameId, String sessionId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
-//        if (!gameStorage.contains(gameId)) {
-//            throw new GameNotFoundException("Game " + gameId + " does not exist.");
-//        }
-//        if (!(gameStorage.getGame(gameId) instanceof Game)) {
-//            throw new UnsupportedGameTypeException("{" + gameId + "}");
-//        }
-//        Game game = (Game) gameStorage.getGame(gameId);
-//
-//        if (game.getStatus() == IN_PROGRESS || game.getStatus() == WAITING_FOR_ANOTHER_PLAYER) {
-//            throw new InvalidGameStateException("Game " + gameId + " cannot be started.");
-//        }
-//        Player player = game.getPlayer(sessionId);
-//        if (game.getPlayer(sessionId).getPlayerNumber() != 1) {
-//            throw new InvalidGameStateException("Player " + player.getUsername() + " is not allowed to start timer.");
-//        }
-//        game.setStatus(COUNTDOWN);
-//        return game;
-//    }
-
-    private void processUserStats(Player player, Game game) {
+    /**
+     * Helper method to process user stats.
+     *
+     * @param player    - player for stats processing
+     * @param multiGame - a game player participated in
+     */
+    private void processUserStats(Player player, MultiGame multiGame) {
         User user = activeUserStorage.getUser(player.getUsername());
-        User updatedUser = player.calculateMultiplayerStats(user, game.getGameText(), game.getStartTime());
+        User updatedUser = player.calculateMultiplayerStats(user, multiGame.getGameText(), multiGame.getStartTime());
         userService.updateUserInfo(updatedUser);
     }
 }

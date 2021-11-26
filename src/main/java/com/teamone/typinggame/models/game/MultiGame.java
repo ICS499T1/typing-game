@@ -1,27 +1,21 @@
 package com.teamone.typinggame.models.game;
 
 import com.teamone.typinggame.configuration.GameConfig;
-import com.teamone.typinggame.models.GameStatus;
 import com.teamone.typinggame.models.Player;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static com.teamone.typinggame.models.GameStatus.*;
+import static com.teamone.typinggame.models.GameStatus.COUNTDOWN;
+import static com.teamone.typinggame.models.GameStatus.WAITING_FOR_ANOTHER_PLAYER;
 
 @RequiredArgsConstructor
 @Component
-public class Game extends GameInterface {
-    private final ReadWriteLock gameRwLock = new ReentrantReadWriteLock();
-    private final ReadWriteLock playerSetLock = new ReentrantReadWriteLock();
-    private final ReadWriteLock doneLock = new ReentrantReadWriteLock();
+public class MultiGame extends GameInterface {
 
     @Getter
     private Map<String, Player> players;
@@ -33,7 +27,12 @@ public class Game extends GameInterface {
 
     private GameConfig gameConfig = new GameConfig();
 
-    public Game(String gameId) {
+    /**
+     * Basic constructor for game initialization.
+     *
+     * @param gameId - game id
+     */
+    public MultiGame(String gameId) {
         initialText();
         setGameId(gameId);
         this.players = new HashMap<>();
@@ -42,6 +41,9 @@ public class Game extends GameInterface {
         setDoneCount(0);
     }
 
+    /**
+     * Reassigns the players if the player leaves.
+     */
     public void reassignPlayers() {
         if (getPlayerCount() >= 1) {
             AtomicInteger playerNum = new AtomicInteger(0);
@@ -49,6 +51,11 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Checks if the host is in the game.
+     *
+     * @return boolean - true if host is there, false otherwise.
+     */
     public boolean containsHost() {
         playerSetLock.writeLock().lock();
         try {
@@ -85,6 +92,13 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Adds a player to the list of players.
+     *
+     * @param sessionId - player's session id
+     * @param player    - player
+     * @return boolean - true if added successfully, false otherwise
+     */
     public boolean addPlayer(String sessionId, Player player) {
         playerSetLock.writeLock().lock();
         try {
@@ -99,6 +113,12 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Removes a player from the game.
+     *
+     * @param sessionId - player's session id
+     * @return boolean - true if the player is removed, false otherwise.
+     */
     public boolean removePlayer(String sessionId) {
         playerSetLock.writeLock().lock();
         try {
@@ -113,6 +133,12 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Gets a player based on their session id.
+     *
+     * @param sessionId - player's session id
+     * @return Player
+     */
     public Player getPlayer(String sessionId) {
         playerSetLock.readLock().lock();
         try {
@@ -122,6 +148,12 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Checks if the list contains a player based on their session id.
+     *
+     * @param sessionId - player's session id
+     * @return boolean - true if the player is there, false otherwise
+     */
     public boolean containsPlayer(String sessionId) {
         playerSetLock.readLock().lock();
         try {
@@ -131,6 +163,9 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Resets each player.
+     */
     public void resetPlayers() {
         playerSetLock.writeLock().lock();
         try {
@@ -140,6 +175,9 @@ public class Game extends GameInterface {
         }
     }
 
+    /**
+     * Resets each game.
+     */
     public void reset() {
         doneLock.writeLock().lock();
         gameRwLock.writeLock().lock();

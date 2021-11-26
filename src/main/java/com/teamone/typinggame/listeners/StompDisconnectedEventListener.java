@@ -1,8 +1,8 @@
 package com.teamone.typinggame.listeners;
 
-import com.teamone.typinggame.controllers.GameController;
+import com.teamone.typinggame.controllers.MultiGameController;
 import com.teamone.typinggame.models.Player;
-import com.teamone.typinggame.models.game.Game;
+import com.teamone.typinggame.models.game.MultiGame;
 import com.teamone.typinggame.models.game.GameInterface;
 import com.teamone.typinggame.services.game.SingleGameServiceImpl;
 import com.teamone.typinggame.storage.GameStorage;
@@ -19,7 +19,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 public class StompDisconnectedEventListener implements ApplicationListener<SessionDisconnectEvent> {
 
     @Autowired
-    private GameController gameController;
+    private MultiGameController multiGameController;
 
     @Autowired
     private SingleGameServiceImpl singleGameService;
@@ -39,9 +39,9 @@ public class StompDisconnectedEventListener implements ApplicationListener<Sessi
                 GameInterface game = gameStorage.getGame(gameId);
                 if (game != null) {
                     System.out.println("GAME NOT NULL");
-                    if (gameStorage.getGame(gameId) instanceof Game) {
+                    if (gameStorage.getGame(gameId) instanceof MultiGame) {
                         System.out.println("CALLING REMOVE");
-                        gameController.removePlayer(sessionId);
+                        multiGameController.removePlayer(sessionId);
                     } else {
                         singleGameService.removePlayer(sessionId);
                     }

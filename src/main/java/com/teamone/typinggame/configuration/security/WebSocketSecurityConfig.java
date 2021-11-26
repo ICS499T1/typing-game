@@ -38,7 +38,6 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-//                    System.out.println(accessor.getNativeHeader("Authorization"));
                     List tokenList = accessor.getNativeHeader("Authorization");
                     String token = null;
                     if(tokenList == null || tokenList.size() < 1) {
@@ -62,11 +61,7 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
 
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-//                    Authentication user = ... ; // access authentication header(s)
                     accessor.setUser(authenticationToken);
-//                    accessor.setLeaveMutable(true);
-//                    System.out.println("accessor headers: " + accessor.getMessageHeaders());
-//                    return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
                 }
                 return message;
             }

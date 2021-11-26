@@ -68,6 +68,9 @@ public abstract class GameInterface {
         }
     }
 
+    /**
+     * Increments the number of players that are done.
+     */
     public void incrementDoneCount() {
         doneLock.writeLock().lock();
         try {
@@ -77,6 +80,9 @@ public abstract class GameInterface {
         }
     }
 
+    /**
+     * Decrements the number of players that are done.
+     */
     public void decrementDoneCount() {
         doneLock.writeLock().lock();
         try {
@@ -86,6 +92,9 @@ public abstract class GameInterface {
         }
     }
 
+    /**
+     * Sets text for the game by making a request to the API.
+     */
     public void fillGameText() {
         gameText = new ArrayList<>();
         String url = "http://metaphorpsum.com/sentences/5";
@@ -99,6 +108,9 @@ public abstract class GameInterface {
         }
     }
 
+    /**
+     * Sets the default text until the game is started.
+     */
     public void initialText() {
         gameText = new ArrayList<>();
         String initialText = "Welcome to Space Racer! Invite your friends using the link above!!";

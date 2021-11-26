@@ -1,6 +1,5 @@
 package com.teamone.typinggame.storage;
 
-import com.teamone.typinggame.models.game.Game;
 import com.teamone.typinggame.models.game.GameInterface;
 
 import java.util.HashMap;

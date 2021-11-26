@@ -42,19 +42,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.saveAndFlush(user);
     }
 
-    public UserDetails authorizeUser(User user) {
-        try {
-            UserDetails loadedUser = loadUserByUsername(user.getUsername());
-            if (bCryptPasswordEncoder.matches(user.getPassword(), loadedUser.getPassword())) return loadedUser;
-            else throw new IncorrectPasswordException("The password is not correct.");
-        } catch (UsernameNotFoundException ex) {
-            logger.error("authorizeUser -> ", ex);
-        } catch (Exception ex) {
-            logger.error("authorizeUser -> ", ex);
-        }
-        return null;
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
@@ -68,7 +55,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User pulledUser = userRepository.findByUsername(user.getUsername());
         pulledUser.setAllKeys(user.getAllKeys());
         pulledUser.setUserStats(user.getUserStats());
-        //user.getAllKeys().forEach(key -> System.out.println(key));
         return userRepository.saveAndFlush(pulledUser);
     }
 }

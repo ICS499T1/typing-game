@@ -2,7 +2,6 @@ package com.teamone.typinggame.models.game;
 
 import com.teamone.typinggame.configuration.GameConfig;
 import com.teamone.typinggame.models.Player;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +9,19 @@ import static com.teamone.typinggame.models.GameStatus.READY;
 
 @RequiredArgsConstructor
 @Component
-public class SingleplayerGame extends GameInterface {
+public class SingleGame extends GameInterface {
 
     private Player player;
 
     private GameConfig gameConfig = new GameConfig();
 
-    public SingleplayerGame(String gameId, Player player) {
+    /**
+     * Basic constructor for a single player game.
+     *
+     * @param gameId - game id
+     * @param player - game creator
+     */
+    public SingleGame(String gameId, Player player) {
         fillGameText();
         this.player = player;
         setGameId(gameId);
@@ -33,6 +38,9 @@ public class SingleplayerGame extends GameInterface {
         }
     }
 
+    /**
+     * Resets the player.
+     */
     private void resetPlayer() {
         playerSetLock.writeLock().lock();
         try {
@@ -42,6 +50,9 @@ public class SingleplayerGame extends GameInterface {
         }
     }
 
+    /**
+     * Resets the game.
+     */
     public void reset() {
         doneLock.writeLock().lock();
         gameRwLock.writeLock().lock();

@@ -8,5 +8,10 @@ import java.util.Collection;
 import java.util.List;
 
 public interface LeaderboardService {
-   Leaderboard fetchTopStats();
+    /**
+     * Grabs top twenty players from the database.
+     *
+     * @return Leaderboard - with top players
+     */
+    Leaderboard fetchTopStats();
 }

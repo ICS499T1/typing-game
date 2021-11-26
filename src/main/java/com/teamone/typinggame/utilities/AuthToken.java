@@ -34,7 +34,14 @@ public class AuthToken {
 
     private final Algorithm algorithm = Algorithm.HMAC256("secret");
 
-    public String createAccessToken(HttpServletRequest request, User user){
+    /**
+     * Creates access token for the user.
+     *
+     * @param request - http request
+     * @param user    - user associated with the token
+     * @return String - new access token
+     */
+    public String createAccessToken(HttpServletRequest request, User user) {
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 3600 * 1000))
@@ -44,6 +51,13 @@ public class AuthToken {
         return accessToken;
     }
 
+    /**
+     * Creates refresh token for the user.
+     *
+     * @param request - http request
+     * @param user    - user associated with the token
+     * @return String - new refresh token
+     */
     public String createRefreshToken(HttpServletRequest request, User user) {
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
@@ -53,6 +67,13 @@ public class AuthToken {
         return refreshToken;
     }
 
+    /**
+     * Refreshes access token for the user.
+     *
+     * @param request  - http request
+     * @param response - http response
+     * @throws IOException when the input or output is incorrect
+     */
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String authorizationHeader = request.getHeader(AUTHORIZATION);
