@@ -102,14 +102,14 @@ public class GameServiceImpl extends AbstractGameService {
     @Override
     public synchronized Game startTimer(String gameId) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!gameStorage.contains(gameId)) {
-            throw new GameNotFoundException("Game " + gameId + " does not exist.");
+            throw new GameNotFoundException("Game {" + gameId + "} does not exist.");
         }
         if (!(gameStorage.getGame(gameId) instanceof Game)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
         Game game = (Game) gameStorage.getGame(gameId);
         if (game.getStatus() != READY) {
-            throw new InvalidGameStateException("Game " + gameId + " cannot be ended.");
+            throw new InvalidGameStateException("Timer for game {" + gameId + "} cannot be started.");
         }
         game.reset();
         return game;

@@ -37,7 +37,7 @@ public class AuthToken {
     public String createAccessToken(HttpServletRequest request, User user){
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 15 * 1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 3600 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
@@ -47,7 +47,7 @@ public class AuthToken {
     public String createRefreshToken(HttpServletRequest request, User user) {
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 30 * 1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 12 * 3600 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
         return refreshToken;

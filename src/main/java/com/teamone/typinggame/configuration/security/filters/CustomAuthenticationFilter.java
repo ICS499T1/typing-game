@@ -30,6 +30,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     private final AuthToken authToken;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * CustomAuthenticationFilter constructor that allows to initialize the class.
+     *
+     * @param authToken - authorization token util class that provides access to token-related methods.
+     * @param authenticationManager - processes authentication requests.
+     */
     public CustomAuthenticationFilter(AuthToken authToken, AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
         this.authToken = authToken;

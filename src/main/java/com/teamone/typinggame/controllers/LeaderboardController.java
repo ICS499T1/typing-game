@@ -19,6 +19,10 @@ public class LeaderboardController {
     @Autowired
     private LeaderboardServiceImpl leaderboardService;
 
+    /**
+     * Returns TOP-20 users.
+     * @return Leaderboard - top users.
+     */
     @CrossOrigin
     @GetMapping
     public Leaderboard getTopUsers() {
