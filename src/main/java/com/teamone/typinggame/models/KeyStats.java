@@ -35,7 +35,8 @@ public class KeyStats {
 
     public KeyStats(Character character) {
         this.character = character;
-
+        this.numFails = 0L;
+        this.numSuccesses = 0L;
     }
 
     public KeyStats(char character, long numFails, long numSuccesses, User user) {

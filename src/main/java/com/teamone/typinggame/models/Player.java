@@ -82,25 +82,28 @@ public class Player {
 
         oldKeyStatsList.forEach(keyStats -> keyStatsMap.put(keyStats.getCharacter(), keyStats));
 
+        // This structure holds character frequency in game text
         Map<Character, Integer> gameTextCounts = new HashMap<>();
+
+        // This structure holds character frequency of failed characters
         Map<Character, Integer> failedCharactersCounts = new HashMap<>();
+
         countGameLetters(gameTextCounts, completedText);
         countFailedChars(failedCharactersCounts);
         // Fixed key stats loading logic
         gameTextCounts.forEach((character, count) -> {
             KeyStats keyStats = keyStatsMap.get(character);
+            System.out.println(keyStats);
 
             if (keyStats == null) {
-                keyStats = new KeyStats();
-                keyStats.setCharacter(character);
+                keyStats = new KeyStats(character);
             }
             Integer numFailsThisMatch = failedCharactersCounts.get(character);
             if (numFailsThisMatch != null) {
-                keyStats.setNumFails(numFailsThisMatch.longValue());
-                keyStats.setNumSuccesses(count.longValue() - numFailsThisMatch);
+                keyStats.setNumFails(numFailsThisMatch.longValue() + keyStats.getNumFails());
+                keyStats.setNumSuccesses((count.longValue()) + keyStats.getNumSuccesses());
             } else {
-                keyStats.setNumSuccesses(count.longValue());
-                keyStats.setNumFails(0L);
+                keyStats.setNumSuccesses(count.longValue() + keyStats.getNumSuccesses());
             }
             keyStats.setUser(user);
             keyStatsMap.put(character, keyStats);
@@ -131,16 +134,14 @@ public class Player {
             KeyStats keyStats = keyStatsMap.get(character);
 
             if (keyStats == null) {
-                keyStats = new KeyStats();
-                keyStats.setCharacter(character);
+                keyStats = new KeyStats(character);
             }
             Integer numFailsThisMatch = failedCharactersCounts.get(character);
             if (numFailsThisMatch != null) {
-                keyStats.setNumFails(numFailsThisMatch.longValue());
-                keyStats.setNumSuccesses(count.longValue() - numFailsThisMatch);
+                keyStats.setNumFails(numFailsThisMatch.longValue() + keyStats.getNumFails());
+                keyStats.setNumSuccesses((count.longValue()) + keyStats.getNumSuccesses());
             } else {
-                keyStats.setNumSuccesses(count.longValue());
-                keyStats.setNumFails(0L);
+                keyStats.setNumSuccesses(count.longValue() + keyStats.getNumSuccesses());
             }
             keyStats.setUser(user);
             keyStatsMap.put(character, keyStats);

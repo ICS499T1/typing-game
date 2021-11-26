@@ -88,8 +88,7 @@ public abstract class GameInterface {
 
     public void fillGameText() {
         gameText = new ArrayList<>();
-        //TODO change back to 10 sentences at end of url
-        String url = "http://metaphorpsum.com/paragraphs/1/5";
+        String url = "http://metaphorpsum.com/sentences/5";
         RestTemplate restTemplate = new RestTemplate();
         String paragraph = restTemplate.getForObject(url, String.class);
 
