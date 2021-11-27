@@ -174,13 +174,18 @@ public class Player {
             if (keyStats == null) {
                 keyStats = new KeyStats(character);
             }
-            Integer numFailsThisMatch = failedCharactersCounts.get(character);
-            if (numFailsThisMatch != null) {
-                keyStats.setNumFails(numFailsThisMatch.longValue() + keyStats.getNumFails());
-                keyStats.setNumSuccesses((count.longValue()) + keyStats.getNumSuccesses());
-            } else {
-                keyStats.setNumSuccesses(count.longValue() + keyStats.getNumSuccesses());
+            keyStats.setNumSuccesses(count.longValue() + keyStats.getNumSuccesses());
+            keyStats.setUser(user);
+            keyStatsMap.put(character, keyStats);
+        });
+
+        failedCharactersCounts.forEach((character, count) -> {
+            KeyStats keyStats = keyStatsMap.get(character);
+
+            if (keyStats == null) {
+                keyStats = new KeyStats(character);
             }
+            keyStats.setNumFails(count.longValue() + keyStats.getNumFails());
             keyStats.setUser(user);
             keyStatsMap.put(character, keyStats);
         });
