@@ -145,11 +145,11 @@ public class MultiGameServiceImpl extends AbstractGameService {
         if (multiGame.getStatus() == IN_PROGRESS) {
             player.setEndTime(System.currentTimeMillis());
             processUserStats(player, multiGame);
-        }
 
-        if (player.getPosition() >= multiGame.getGameText().size() && multiGame.getDoneCount() > 0) {
-            System.out.println("DECREMENTING");
-            multiGame.decrementDoneCount();
+            if (player.getPosition() >= multiGame.getGameText().size() && multiGame.getDoneCount() > 0) {
+                System.out.println("DECREMENTING");
+                multiGame.decrementDoneCount();
+            }
         }
 
         multiGame.removePlayer(sessionId);
@@ -162,22 +162,18 @@ public class MultiGameServiceImpl extends AbstractGameService {
             multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             //gameStorage.addGame(game);
         }
-        // TODO: test if the logic for reassigning players works
         if (player.getPlayerNumber() == 1) {
             multiGame.reassignPlayers();
         }
 
-        if (multiGame.getStatus() == COUNTDOWN || multiGame.getDoneCount() == multiGame.getPlayerCount()) {
-            if (multiGame.getStatus() == COUNTDOWN) {
-                multiGame.reset();
-            }
+        if (multiGame.getStatus() == COUNTDOWN) {
             if (multiGame.getPlayerCount() > 1) {
-                multiGame.setStatus(READY);
+                return multiGame;
             } else {
+                multiGame.reset();
                 multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
             }
         }
-        // TODO return the modified game on the /status channel so all other players can update the player being removed and new host being set
         return multiGame;
     }
 
