@@ -22,7 +22,6 @@ public class SingleGame extends GameInterface {
      * @param player - game creator
      */
     public SingleGame(String gameId, Player player) {
-        fillGameText();
         this.player = player;
         setGameId(gameId);
         setStatus(READY);

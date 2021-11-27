@@ -108,16 +108,4 @@ public abstract class GameInterface {
         }
     }
 
-    /**
-     * Sets the default text until the game is started.
-     */
-    public void initialText() {
-        gameText = new ArrayList<>();
-        String initialText = "Welcome to Space Racer! Invite your friends using the link above!!";
-        char[] characterArray = initialText.toCharArray();
-        for (char c : characterArray) {
-            gameText.add(c);
-        }
-    }
-
 }
