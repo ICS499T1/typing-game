@@ -33,6 +33,7 @@ public class MultiGame extends GameInterface {
      * @param gameId - game id
      */
     public MultiGame(String gameId) {
+        initialGameText();
         setGameId(gameId);
         this.players = new HashMap<>();
         this.playerCount = 0;

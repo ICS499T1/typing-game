@@ -108,4 +108,9 @@ public abstract class GameInterface {
         }
     }
 
+    public void initialGameText() {
+        gameText = new ArrayList<>();
+        gameText.add(' ');
+    }
+
 }
