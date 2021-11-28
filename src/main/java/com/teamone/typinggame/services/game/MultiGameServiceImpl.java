@@ -142,19 +142,23 @@ public class MultiGameServiceImpl extends AbstractGameService {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
         MultiGame multiGame = (MultiGame) gameStorage.getGame(gameId);
+
+        multiGame.removePlayer(sessionId);
+        playerStorage.removePlayer(sessionId);
+        activeUserStorage.removeUser(player.getUsername());
+
         if (multiGame.getStatus() == IN_PROGRESS) {
             player.setEndTime(System.currentTimeMillis());
             processUserStats(player, multiGame);
 
             if (player.getPosition() >= multiGame.getGameText().size() && multiGame.getDoneCount() > 0) {
-                System.out.println("DECREMENTING");
                 multiGame.decrementDoneCount();
             }
-        }
 
-        multiGame.removePlayer(sessionId);
-        playerStorage.removePlayer(sessionId);
-        activeUserStorage.removeUser(player.getUsername());
+            if (multiGame.getDoneCount() >= multiGame.getPlayerCount()) {
+                multiGame.setStatus(READY);
+            }
+        }
 
         if (multiGame.getPlayerCount() < 1) {
             gameStorage.removeGame(multiGame);
