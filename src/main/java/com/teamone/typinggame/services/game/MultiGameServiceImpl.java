@@ -145,7 +145,6 @@ public class MultiGameServiceImpl extends AbstractGameService {
 
         multiGame.removePlayer(sessionId);
         playerStorage.removePlayer(sessionId);
-        activeUserStorage.removeUser(player.getUsername());
 
         if (multiGame.getStatus() == IN_PROGRESS) {
             player.setEndTime(System.currentTimeMillis());
@@ -160,11 +159,12 @@ public class MultiGameServiceImpl extends AbstractGameService {
             }
         }
 
+        activeUserStorage.removeUser(player.getUsername());
+
         if (multiGame.getPlayerCount() < 1) {
             gameStorage.removeGame(multiGame);
         } else if (multiGame.getPlayerCount() == 1 && multiGame.getStatus() == READY) {
             multiGame.setStatus(WAITING_FOR_ANOTHER_PLAYER);
-            //gameStorage.addGame(game);
         }
         if (player.getPlayerNumber() == 1) {
             multiGame.reassignPlayers();
