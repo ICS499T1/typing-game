@@ -1,5 +1,6 @@
 package com.teamone.typinggame.controllers;
 
+import com.teamone.typinggame.exceptions.InvalidUsernameException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.SignUp;
 import com.teamone.typinggame.models.User;
@@ -38,7 +39,7 @@ public class UserController {
      * @throws UserAlreadyExistsException when the username exists
      */
     @PostMapping("/add")
-    public User newUser(@RequestBody SignUp signUpInfo) throws UserAlreadyExistsException {
+    public User newUser(@RequestBody SignUp signUpInfo) throws UserAlreadyExistsException, InvalidUsernameException {
         User user = new User();
         user.setUsername(signUpInfo.getUsername());
         user.setPassword(signUpInfo.getPassword());

@@ -1,5 +1,6 @@
 package com.teamone.typinggame.services;
 
+import com.teamone.typinggame.exceptions.InvalidUsernameException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.repositories.UserRepository;
@@ -47,7 +48,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void newUserAdded() throws UserAlreadyExistsException {
+    void newUserAdded() throws UserAlreadyExistsException, InvalidUsernameException {
         result = userServiceImpl.newUser(mockUser);
         assertEquals(result.getUsername(), mockUser.getUsername());
     }

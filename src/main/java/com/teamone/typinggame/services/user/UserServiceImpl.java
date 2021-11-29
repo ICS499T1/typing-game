@@ -1,6 +1,7 @@
 package com.teamone.typinggame.services.user;
 
 import com.teamone.typinggame.exceptions.IncorrectPasswordException;
+import com.teamone.typinggame.exceptions.InvalidUsernameException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
@@ -30,9 +31,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User newUser(User user) throws UserAlreadyExistsException {
+    public User newUser(User user) throws UserAlreadyExistsException, InvalidUsernameException {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistsException(user.getUsername() + " already exists.");
+        }
+        if (user.getUsername().length() < 4 || user.getUsername().length() > 16) {
+            throw new InvalidUsernameException(user.getUsername() + " is not a valid username.");
         }
         String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);

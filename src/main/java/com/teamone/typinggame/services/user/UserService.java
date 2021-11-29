@@ -1,5 +1,6 @@
 package com.teamone.typinggame.services.user;
 
+import com.teamone.typinggame.exceptions.InvalidUsernameException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.User;
@@ -15,7 +16,7 @@ public interface UserService {
      * @return User - created user
      * @throws UserAlreadyExistsException when the user already exists
      */
-    User newUser(User user) throws UserAlreadyExistsException;
+    User newUser(User user) throws UserAlreadyExistsException, InvalidUsernameException;
 
     /**
      * Updates user stats.
