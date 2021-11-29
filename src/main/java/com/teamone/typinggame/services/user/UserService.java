@@ -1,12 +1,8 @@
 package com.teamone.typinggame.services.user;
 
-import com.teamone.typinggame.exceptions.InvalidUsernameException;
+import com.teamone.typinggame.exceptions.InvalidSignUpInfoException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
-import com.teamone.typinggame.exceptions.UserNotFoundException;
 import com.teamone.typinggame.models.User;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.List;
 
 public interface UserService {
     /**
@@ -16,7 +12,7 @@ public interface UserService {
      * @return User - created user
      * @throws UserAlreadyExistsException when the user already exists
      */
-    User newUser(User user) throws UserAlreadyExistsException, InvalidUsernameException;
+    User newUser(User user) throws UserAlreadyExistsException, InvalidSignUpInfoException;
 
     /**
      * Updates user stats.

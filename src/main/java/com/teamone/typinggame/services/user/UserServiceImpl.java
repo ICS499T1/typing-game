@@ -1,7 +1,6 @@
 package com.teamone.typinggame.services.user;
 
-import com.teamone.typinggame.exceptions.IncorrectPasswordException;
-import com.teamone.typinggame.exceptions.InvalidUsernameException;
+import com.teamone.typinggame.exceptions.InvalidSignUpInfoException;
 import com.teamone.typinggame.exceptions.UserAlreadyExistsException;
 import com.teamone.typinggame.models.Stats;
 import com.teamone.typinggame.models.User;
@@ -31,12 +30,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User newUser(User user) throws UserAlreadyExistsException, InvalidUsernameException {
+    public User newUser(User user) throws UserAlreadyExistsException, InvalidSignUpInfoException {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistsException(user.getUsername() + " already exists.");
         }
         if (user.getUsername().length() < 4 || user.getUsername().length() > 16) {
-            throw new InvalidUsernameException(user.getUsername() + " is not a valid username.");
+            throw new InvalidSignUpInfoException(user.getUsername() + " is not a valid username.");
+        } else if (!user.getUsername().matches("^([A-Za-z0-9]+)$")) {
+            throw new InvalidSignUpInfoException(user.getUsername() + " is not a valid username.");
+        } else if (user.getPassword().length() < 1) {
+            throw new InvalidSignUpInfoException("Password must be at least one character.");
         }
         String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
