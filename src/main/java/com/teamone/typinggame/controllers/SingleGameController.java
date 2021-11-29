@@ -73,9 +73,6 @@ public class SingleGameController {
         if (game.getStatus() == GameStatus.READY) {
             simpMessagingTemplate.convertAndSend("/game/single/status/" + gameId, game);
         }
-        if (game.getPlayer().getEndTime() != 0) {
-            simpMessagingTemplate.convertAndSend("/game/single/playerStatus/" + gameId + "/" + sessionId, 1);
-        }
     }
 
     /**
