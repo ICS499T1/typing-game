@@ -104,9 +104,6 @@ public class MultiGameController {
         if (multiGame.getStatus() == GameStatus.READY || multiGame.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
             simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
         }
-        if (multiGame.getPlayer(sessionId).getEndTime() != 0) {
-            simpMessagingTemplate.convertAndSend("/game/playerStatus/" + gameId + "/" + sessionId, 1);
-        }
     }
 
     /**
