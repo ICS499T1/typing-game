@@ -182,7 +182,7 @@ public class MultiGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public MultiGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public synchronized MultiGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, PlayerNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!(gameStorage.getGame(gameId) instanceof MultiGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
