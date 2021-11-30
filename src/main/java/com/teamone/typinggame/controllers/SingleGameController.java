@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Data
 @RestController
-@Slf4j
 public class SingleGameController {
 
     private final SingleGameServiceImpl singleGameService;
@@ -70,7 +69,7 @@ public class SingleGameController {
      */
     @MessageMapping("/gameplay/single/{gameId}/{session}")
     public synchronized void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
-        log.info(input.toString());
+        System.out.println(input.toString());
         SingleGame game = singleGameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/single/gameplay/" + game.getGameId(), game);
         if (game.getStatus() == GameStatus.READY) {
