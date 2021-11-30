@@ -32,6 +32,7 @@ import static java.util.Arrays.stream;
 public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
+        // Used for fixing spring's websockets receiving messages in the wrong order
         registration.taskExecutor().corePoolSize(1);
         registration.interceptors(new ChannelInterceptor() {
             @Override

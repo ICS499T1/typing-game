@@ -106,7 +106,7 @@ public class SingleGameServiceImpl extends AbstractGameService {
     }
 
     @Override
-    public synchronized SingleGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
+    public SingleGame gamePlay(String sessionId, String gameId, Character input) throws GameNotFoundException, InvalidGameStateException, UnsupportedGameTypeException {
         if (!(gameStorage.getGame(gameId) instanceof SingleGame)) {
             throw new UnsupportedGameTypeException("{" + gameId + "}");
         }
