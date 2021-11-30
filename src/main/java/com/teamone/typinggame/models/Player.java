@@ -5,11 +5,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Data
 @Component
 @NoArgsConstructor
 public class Player {
+    private final static ReadWriteLock playerLock = new ReentrantReadWriteLock();
 
     private String username;
 
@@ -34,13 +37,18 @@ public class Player {
      * @param gameId - game id
      */
     public Player(User user, String gameId) {
-        this.username = user.getUsername();
-        this.winner = false;
-        this.endTime = 0L;
-        this.gameId = gameId;
-        this.position = 0;
-        this.incorrectCharacters = new Stack<>();
-        this.failedCharacters = new ArrayList<>();
+        playerLock.writeLock().lock();
+        try {
+            this.username = user.getUsername();
+            this.winner = false;
+            this.endTime = 0L;
+            this.gameId = gameId;
+            this.position = 0;
+            this.incorrectCharacters = new Stack<>();
+            this.failedCharacters = new ArrayList<>();
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -60,7 +68,12 @@ public class Player {
      * Increments position of the player.
      */
     public void incrementPosition() {
-        position++;
+        playerLock.writeLock().lock();
+        try {
+            position++;
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -69,7 +82,12 @@ public class Player {
      * @param character - failed character
      */
     public void addFailedCharacter(Character character) {
-        failedCharacters.add(character);
+        playerLock.writeLock().lock();
+        try {
+            failedCharacters.add(character);
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -78,25 +96,40 @@ public class Player {
      * @param character - incorrect character
      */
     public void addIncorrectCharacter(Character character) {
-        incorrectCharacters.add(character);
+        playerLock.writeLock().lock();
+        try {
+            incorrectCharacters.add(character);
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     /**
      * Removes latest incorrect character from the stack.
      */
     public void removeIncorrectCharacter() {
-        incorrectCharacters.pop();
+        playerLock.writeLock().lock();
+        try {
+            incorrectCharacters.pop();
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     /**
      * Reset all values for the player.
      */
     public void reset() {
-        position = 0;
-        failedCharacters = new ArrayList<>();
-        incorrectCharacters = new Stack<>();
-        winner = false;
-        endTime = 0L;
+        playerLock.writeLock().lock();
+        try {
+            position = 0;
+            failedCharacters = new ArrayList<>();
+            incorrectCharacters = new Stack<>();
+            winner = false;
+            endTime = 0L;
+        } finally {
+            playerLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -107,7 +140,7 @@ public class Player {
      * @param startTime - the time the user started playing
      * @return User with updated stats and keyStats
      */
-    public User calculateSinglePlayerStats(User user, List<Character> gameText, Long startTime) {
+    public synchronized User calculateSinglePlayerStats(User user, List<Character> gameText, Long startTime) {
         List<Character> completedText = gameText.subList(0, position);
         Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
         List<KeyStats> oldKeyStatsList = user.getAllKeys();
@@ -138,7 +171,7 @@ public class Player {
      * @param startTime - the time the user started playing
      * @return User with updated stats and keyStats
      */
-    public User calculateMultiplayerStats(User user, List<Character> gameText, Long startTime) {
+    public synchronized User calculateMultiplayerStats(User user, List<Character> gameText, Long startTime) {
         List<Character> completedText = gameText.subList(0, position);
         Double currentRaceSpeed = calculateCurrentRaceSpeed(completedText, startTime);
         List<KeyStats> oldKeyStatsList = user.getAllKeys();
