@@ -72,6 +72,11 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
     }
 
     @Override
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        registration.taskExecutor().corePoolSize(1);
+    }
+
+    @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setPreservePublishOrder(true);
     }
