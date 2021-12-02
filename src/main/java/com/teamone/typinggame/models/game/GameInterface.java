@@ -108,6 +108,9 @@ public abstract class GameInterface {
         }
     }
 
+    /**
+     * Sets the initial game text (before it is started) to empty
+     */
     public void initialGameText() {
         gameText = new ArrayList<>();
         gameText.add(' ');
