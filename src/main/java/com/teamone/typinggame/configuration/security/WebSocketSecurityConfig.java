@@ -10,7 +10,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -34,7 +33,7 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // Used for fixing spring's websockets receiving messages in the wrong order
-        registration.taskExecutor().corePoolSize(1);
+        //registration.taskExecutor().corePoolSize(1);
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -69,15 +68,5 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
                 return message;
             }
         });
-    }
-
-    @Override
-    public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registration.taskExecutor().corePoolSize(1);
-    }
-
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setPreservePublishOrder(true);
     }
 }
