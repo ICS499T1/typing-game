@@ -14,7 +14,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/game");
         config.setApplicationDestinationPrefixes("/app");
-//        config.setPreservePublishOrder(true);
     }
 
     @Override
