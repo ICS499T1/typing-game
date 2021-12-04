@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.teamone.typinggame.executor.SpaceRacerTaskExecutor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -33,7 +34,13 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         // Used for fixing spring's websockets receiving messages in the wrong order
-        //registration.taskExecutor().corePoolSize(1);
+        registration.taskExecutor().corePoolSize(1);
+//        registration.taskExecutor().queueCapacity(10).corePoolSize(1).maxPoolSize(1);
+//        StripedExecutorService stripedExecutor = new StripedExecutorService();
+//        ConcurrentTaskExecutor wrapper = new ConcurrentTaskExecutor(stripedExecutor);
+        SpaceRacerTaskExecutor taskExecutor = new SpaceRacerTaskExecutor();
+        registration.taskExecutor(taskExecutor);
+
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
