@@ -147,8 +147,10 @@ public class MultiGameServiceImpl extends AbstractGameService {
         playerStorage.removePlayer(sessionId);
 
         if (multiGame.getStatus() == IN_PROGRESS) {
-            player.setEndTime(System.currentTimeMillis());
-            processUserStats(player, multiGame);
+            if (player.getEndTime() == 0) {
+                player.setEndTime(System.currentTimeMillis());
+                processUserStats(player, multiGame);
+            }
 
             if (player.getPosition() >= multiGame.getGameText().size() && multiGame.getDoneCount() > 0) {
                 multiGame.decrementDoneCount();
