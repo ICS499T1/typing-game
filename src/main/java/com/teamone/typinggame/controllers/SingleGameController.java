@@ -68,8 +68,7 @@ public class SingleGameController {
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/gameplay/single/{gameId}/{session}")
-    public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
-        System.out.println(input.toString());
+    public synchronized void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
         SingleGame game = singleGameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/single/gameplay/" + game.getGameId(), game);
         if (game.getStatus() == GameStatus.READY) {
