@@ -98,12 +98,13 @@ public class MultiGameController {
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/gameplay/{gameId}/{session}")
-    public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
-        MultiGame multiGame = gameService.gamePlay(sessionId, gameId, input);
-        simpMessagingTemplate.convertAndSend("/game/gameplay/" + multiGame.getGameId(), multiGame);
-        if (multiGame.getStatus() == GameStatus.READY || multiGame.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
-            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
-        }
+    public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Integer input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
+        System.out.println(input);
+//        MultiGame multiGame = gameService.gamePlay(sessionId, gameId, input);
+//        simpMessagingTemplate.convertAndSend("/game/gameplay/" + multiGame.getGameId(), multiGame);
+//        if (multiGame.getStatus() == GameStatus.READY || multiGame.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
+//            simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
+//        }
     }
 
     /**
