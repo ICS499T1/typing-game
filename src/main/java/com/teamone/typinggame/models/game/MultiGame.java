@@ -25,7 +25,7 @@ public class MultiGame extends GameInterface {
     @Getter
     private Integer playerCount;
 
-    private GameConfig gameConfig = new GameConfig();
+    private GameConfig gameConfig;
 
     /**
      * Basic constructor for game initialization.

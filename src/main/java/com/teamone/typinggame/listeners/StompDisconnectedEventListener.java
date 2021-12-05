@@ -34,13 +34,10 @@ public class StompDisconnectedEventListener implements ApplicationListener<Sessi
             String sessionId = (String) event.getMessage().getHeaders().get("simpSessionId");
             Player player = playerStorage.getPlayer(sessionId);
             if (player != null) {
-                System.out.println("GETTING GAME");
                 String gameId = player.getGameId();
                 GameInterface game = gameStorage.getGame(gameId);
                 if (game != null) {
-                    System.out.println("GAME NOT NULL");
                     if (gameStorage.getGame(gameId) instanceof MultiGame) {
-                        System.out.println("CALLING REMOVE");
                         multiGameController.removePlayer(sessionId);
                     } else {
                         singleGameService.removePlayer(sessionId);
