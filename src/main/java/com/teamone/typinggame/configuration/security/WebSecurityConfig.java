@@ -5,6 +5,7 @@ import com.teamone.typinggame.configuration.security.filters.CustomAuthorization
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import com.teamone.typinggame.utilities.AuthToken;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,9 @@ import org.springframework.web.filter.CorsFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private CustomAuthorizationFilter authorizationFilter;
+
     private final UserServiceImpl userService;
     private final AuthToken authToken;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -34,7 +38,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         CustomAuthenticationFilter authenticationFilter = new CustomAuthenticationFilter(authToken, authenticationManagerBean());
-        CustomAuthorizationFilter authorizationFilter = new CustomAuthorizationFilter();
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 // this is where you add urls so that you can access them without authorization

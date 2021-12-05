@@ -47,7 +47,7 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    List tokenList = accessor.getNativeHeader(gameConfig.getTokenProperty("auth"));
+                    List tokenList = accessor.getNativeHeader("Authorization");
                     String token = null;
                     if(tokenList == null || tokenList.size() < 1) {
                         return message;
@@ -57,12 +57,12 @@ public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer
                             return message;
                         }
                     }
-                    token = token.substring(gameConfig.getTokenProperty("bearer").length());
+                    token = token.substring("Bearer ".length());
                     Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
                     JWTVerifier verifier = JWT.require(algorithm).build();
                     DecodedJWT decodedJWT = verifier.verify(token);
                     String username = decodedJWT.getSubject();
-                    String[] roles = decodedJWT.getClaim(gameConfig.getTokenProperty("roles")).asArray(String.class);
+                    String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
                     Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
                     stream(roles).forEach(role -> {
                         authorities.add(new SimpleGrantedAuthority(role));
