@@ -23,7 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@AllArgsConstructor
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -33,9 +32,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationFilter authenticationFilter;
 
-    private final UserServiceImpl userService;
+    private UserServiceImpl userService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    public WebSecurityConfig(UserServiceImpl userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
