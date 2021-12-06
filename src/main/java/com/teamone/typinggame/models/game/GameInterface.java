@@ -1,8 +1,10 @@
 package com.teamone.typinggame.models.game;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.teamone.typinggame.models.GameStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONObject;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -97,12 +99,17 @@ public abstract class GameInterface {
      */
     public void fillGameText() {
         gameText = new ArrayList<>();
-        String url = "http://metaphorpsum.com/sentences/5";
+//        String url = "http://metaphorpsum.com/sentences/5";
+//        RestTemplate restTemplate = new RestTemplate();
+//        String paragraph = restTemplate.getForObject(url, String.class);
+
+        String url = "https://text-generator-prod.herokuapp.com/paragraph/get/5";
         RestTemplate restTemplate = new RestTemplate();
         String paragraph = restTemplate.getForObject(url, String.class);
 
+        JSONObject jsonObject = new JSONObject(paragraph);
 
-        char[] characterArray = paragraph.toCharArray();
+        char[] characterArray = jsonObject.getString("text").toCharArray();
         for (char c : characterArray) {
             gameText.add(c);
         }

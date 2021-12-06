@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class GameConfig {
 
     private String secret;
+    private String textGeneratorUrl;
 
     public String getSecret() {
         return secret;
@@ -17,4 +18,11 @@ public class GameConfig {
         this.secret = secret;
     }
 
+    public String getTextGeneratorUrl() {
+        return textGeneratorUrl;
+    }
+
+    public void setTextGeneratorUrl(String textGeneratorUrl) {
+        this.textGeneratorUrl = textGeneratorUrl;
+    }
 }
