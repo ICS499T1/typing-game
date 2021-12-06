@@ -30,14 +30,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private CustomAuthorizationFilter authorizationFilter;
+    @Autowired
+    private CustomAuthenticationFilter authenticationFilter;
 
     private final UserServiceImpl userService;
-    private final AuthToken authToken;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter authenticationFilter = new CustomAuthenticationFilter(authToken, authenticationManagerBean());
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 // this is where you add urls so that you can access them without authorization

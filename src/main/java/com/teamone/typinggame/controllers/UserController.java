@@ -22,13 +22,14 @@ import java.io.IOException;
 @RequestMapping("/user")
 public class UserController {
 
-    private final AuthToken authToken;
+    @Autowired
+    private AuthToken authToken;
+
     private final UserServiceImpl userServiceImpl;
 
     @Autowired
-    public UserController(UserServiceImpl userServiceImpl, AuthToken authToken) {
+    public UserController(UserServiceImpl userServiceImpl) {
         this.userServiceImpl = userServiceImpl;
-        this.authToken = authToken;
     }
 
     /**
