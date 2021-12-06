@@ -5,10 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamone.typinggame.configuration.GameConfig;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.services.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +31,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Component
 @RequiredArgsConstructor
 public class AuthToken {
+    @Autowired
+    private GameConfig gameConfig;
 
     private final UserServiceImpl userServiceImpl;
 
-    private final Algorithm algorithm = Algorithm.HMAC256("secret");
+    private final Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
 
     /**
      * Creates access token for the user.
