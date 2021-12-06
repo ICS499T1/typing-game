@@ -1,16 +1,23 @@
 package com.teamone.typinggame.models;
 
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Entity
 @Table(name = "users")
-public class User {
+@Getter
+@Setter
+@JsonIgnoreProperties(value={"password"})
+public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "userID", nullable = false)
@@ -19,11 +26,15 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+
+    @Column(nullable = false)
+    private String password;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = false)
     @PrimaryKeyJoinColumn
     private Stats userStats;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, targetEntity=KeyStats.class)
     private List<KeyStats> allKeys;
 
     public Long getUserID() {
@@ -37,8 +48,39 @@ public class User {
         this.username = username;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("USER");
+        return Collections.singletonList(authority);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setUsername(String username) {
@@ -59,6 +101,19 @@ public class User {
 
     public void setAllKeys(List<KeyStats> allKeys) {
         this.allKeys = allKeys;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof User && ((User) o).getUsername().equals(this.username));
+    }
+
+    @Override
+    public int hashCode() {
+        if (username == null) {
+            return 0;
+        }
+        return username.hashCode();
     }
 
     @Override

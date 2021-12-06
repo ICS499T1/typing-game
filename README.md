@@ -1,5 +1,5 @@
 # Speed Typing Game
-Typing game to make learning to type faster, easier, and more fun. A user will be able to create an account and compete with more players. The stats will help the user figure out what it's needed to make it into the leaderboard. 
+Typing multiGame to make learning to type faster, easier, and more fun. A user will be able to create an account and compete with more players. The stats will help the user figure out what it's needed to make it into the leaderboard. 
 
 **Tools used:** 
 - Java
