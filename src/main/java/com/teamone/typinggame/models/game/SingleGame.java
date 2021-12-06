@@ -1,6 +1,5 @@
 package com.teamone.typinggame.models.game;
 
-import com.teamone.typinggame.configuration.GameConfig;
 import com.teamone.typinggame.models.Player;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,8 +11,6 @@ import static com.teamone.typinggame.models.GameStatus.READY;
 public class SingleGame extends GameInterface {
 
     private Player player;
-
-    private GameConfig gameConfig = new GameConfig();
 
     /**
      * Basic constructor for a single player game.

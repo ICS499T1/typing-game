@@ -29,14 +29,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AuthToken {
     @Autowired
     private GameConfig gameConfig;
 
     private final UserServiceImpl userServiceImpl;
 
-    private final Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
+    @Autowired
+    public AuthToken(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
+    }
 
     /**
      * Creates access token for the user.
@@ -46,6 +48,7 @@ public class AuthToken {
      * @return String - new access token
      */
     public String createAccessToken(HttpServletRequest request, User user) {
+        Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 3600 * 1000))
@@ -63,6 +66,7 @@ public class AuthToken {
      * @return String - new refresh token
      */
     public String createRefreshToken(HttpServletRequest request, User user) {
+        Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 12 * 3600 * 1000))
@@ -79,6 +83,7 @@ public class AuthToken {
      * @throws IOException when the input or output is incorrect
      */
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Algorithm algorithm = Algorithm.HMAC256(gameConfig.getSecret());
 
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.utilities.AuthToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,20 +23,19 @@ import java.util.Map;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
+@Configuration
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final AuthToken authToken;
-    private final AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthToken authToken;
 
-    /**
-     * CustomAuthenticationFilter constructor that allows to initialize the class.
-     *
-     * @param authToken - authorization token util class that provides access to token-related methods.
-     * @param authenticationManager - processes authentication requests.
-     */
-    public CustomAuthenticationFilter(AuthToken authToken, AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-        this.authToken = authToken;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Override
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        super.setAuthenticationManager(authenticationManager);
     }
 
     @Override
