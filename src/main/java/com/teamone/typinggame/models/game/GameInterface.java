@@ -99,17 +99,11 @@ public abstract class GameInterface {
      */
     public void fillGameText() {
         gameText = new ArrayList<>();
-//        String url = "http://metaphorpsum.com/sentences/5";
-//        RestTemplate restTemplate = new RestTemplate();
-//        String paragraph = restTemplate.getForObject(url, String.class);
-
-        String url = "https://text-generator-prod.herokuapp.com/paragraph/get/5";
+        String url = "http://metaphorpsum.com/sentences/5";
         RestTemplate restTemplate = new RestTemplate();
         String paragraph = restTemplate.getForObject(url, String.class);
 
-        JSONObject jsonObject = new JSONObject(paragraph);
-
-        char[] characterArray = jsonObject.getString("text").toCharArray();
+        char[] characterArray = paragraph.toCharArray();
         for (char c : characterArray) {
             gameText.add(c);
         }
