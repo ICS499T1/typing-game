@@ -51,14 +51,12 @@ public class MultiGameController {
      * Starts the game after the countdown is over.
      *
      * @param gameId    - game id
-     * @param principal - authorization object
      * @throws InvalidGameStateException    when the game is not ready to be started
      * @throws GameNotFoundException        when the game does not exist
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/start/{gameId}/{session}")
-    public void startGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
-        // TODO add check for making sure game can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
+    public void startGame(@DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
         MultiGame multiGame = gameService.gameStart(gameId);
         simpMessagingTemplate.convertAndSend("/game/gameplay/" + gameId, multiGame);
         simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
@@ -90,7 +88,6 @@ public class MultiGameController {
      *
      * @param sessionId - player's session id
      * @param gameId    - game id
-     * @param principal - authorization object
      * @param input     - incoming character
      * @throws InvalidGameStateException    when the game is not in progress or the player is already done
      * @throws PlayerNotFoundException      when the player does not exist
@@ -98,7 +95,7 @@ public class MultiGameController {
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/gameplay/{gameId}/{session}")
-    public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
+    public void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
         MultiGame multiGame = gameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/gameplay/" + multiGame.getGameId(), multiGame);
         if (multiGame.getStatus() == GameStatus.READY || multiGame.getStatus() == GameStatus.WAITING_FOR_ANOTHER_PLAYER) {
@@ -116,7 +113,6 @@ public class MultiGameController {
      */
     @MessageMapping("/timer/{gameId}/{session}")
     public void startTimer(@DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
-        // TODO add check for making sure timer can only be started by player who created game (probably by checking if sessionId matches player1's sessionId)
         MultiGame multiGame = gameService.startTimer(gameId);
         simpMessagingTemplate.convertAndSend("/game/status/" + gameId, multiGame);
     }
