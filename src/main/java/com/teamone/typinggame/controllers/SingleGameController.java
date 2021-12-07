@@ -6,7 +6,6 @@ import com.teamone.typinggame.models.User;
 import com.teamone.typinggame.models.game.SingleGame;
 import com.teamone.typinggame.services.game.SingleGameServiceImpl;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +31,6 @@ public class SingleGameController {
      */
     @MessageMapping("/create/single/{gameId}/{session}")
     public void createGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpSessionId") String sessionId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, User user) throws UserNotFoundException, ActiveUserException, GameAlreadyExistsException {
-        System.out.println("Inside of create game");
         if (principal.getName().equals(user.getUsername())) {
             SingleGame game = singleGameService.createGame(gameId, sessionId, user);
             simpMessagingTemplate.convertAndSend("/game/single/status/" + gameId, game);
@@ -43,13 +41,12 @@ public class SingleGameController {
      * Starts the game after the countdown is over.
      *
      * @param gameId    - game id
-     * @param principal - authorization object
      * @throws InvalidGameStateException    when the game is not ready to be started
      * @throws GameNotFoundException        when the game does not exist
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/start/single/{gameId}/{session}")
-    public void startGame(@DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
+    public void startGame(@DestinationVariable(value = "gameId") String gameId) throws InvalidGameStateException, GameNotFoundException, UnsupportedGameTypeException {
         SingleGame game = singleGameService.gameStart(gameId);
         simpMessagingTemplate.convertAndSend("/game/single/gameplay/" + gameId, game);
         simpMessagingTemplate.convertAndSend("/game/single/status/" + gameId, game);
@@ -60,7 +57,6 @@ public class SingleGameController {
      *
      * @param sessionId - player's session id
      * @param gameId    - game id
-     * @param principal - authorization object
      * @param input     - incoming character
      * @throws InvalidGameStateException    when the game is not in progress or the player is already done
      * @throws PlayerNotFoundException      when the player does not exist
@@ -68,7 +64,7 @@ public class SingleGameController {
      * @throws UnsupportedGameTypeException when the user tries to access a multiplayer game as a single player game
      */
     @MessageMapping("/gameplay/single/{gameId}/{session}")
-    public synchronized void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @Header("simpUser") UsernamePasswordAuthenticationToken principal, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
+    public synchronized void gameplay(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, Character input) throws InvalidGameStateException, PlayerNotFoundException, GameNotFoundException, UnsupportedGameTypeException {
         SingleGame game = singleGameService.gamePlay(sessionId, gameId, input);
         simpMessagingTemplate.convertAndSend("/game/single/gameplay/" + game.getGameId(), game);
         if (game.getStatus() == GameStatus.READY) {

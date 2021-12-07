@@ -56,7 +56,7 @@ public class MultiGameServiceImpl extends AbstractGameService {
      * @return MultiGame - updated game
      * @throws GameNotFoundException        when the game does not exist
      * @throws UserNotFoundException        when the user does not exist
-     * @throws InvalidGameStateException    when the ga,e is already in progress or full
+     * @throws InvalidGameStateException    when the game is already in progress or full
      * @throws ActiveUserException          when the user is in another game
      * @throws UnsupportedGameTypeException when the player tries to play the wrong type of game
      */
