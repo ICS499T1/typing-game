@@ -3,7 +3,7 @@ Space Racer is a typing multi and single player game to make learning to type fa
 # Table of Contents
 1. [Tools Used](#tools-used)
 2. [Setup](#setup)
-3. [Contributors](#third-example)
+3. [Contributors](#contributors)
 ## Tools Used
 Project: 
 - Java
